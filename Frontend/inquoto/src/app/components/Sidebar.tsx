@@ -16,10 +16,9 @@ const Sidebar = () => {
   return (
     <div className="bg-[#050A30] text-white h-screen w-64 flex flex-col justify-between">
       <div>
-        <h1 className="text-2xl font-bold p-4">Inquoto</h1>
-        <p className="text-xs px-4">Smart Invoicing. Simple Quoting</p>
+        <h1 className="text-4xl font-bold p-4">Inquoto</h1>
         <nav className="mt-8">
-          <ul className="space-y-2 px-4">
+          <ul className="space-y-4 px-4 text-xl">
             {navItems.map(({ name, href }) => (
               <li key={href}>
                 <Link

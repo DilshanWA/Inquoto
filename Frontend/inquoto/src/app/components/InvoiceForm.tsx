@@ -27,6 +27,12 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
     setItems([...items, { description: '', quantity: 0, unitPrice: 0 }]);
   };
 
+  const handleRemoveItem = (index: number) => {
+    const updatedItems = [...items];
+    updatedItems.splice(index, 1);
+    setItems(updatedItems);
+  };
+
   const handleChangeItem = (index: number, field: keyof LineItem, value: string) => {
     const updatedItems = [...items];
     if (field === 'description') {
@@ -43,7 +49,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
 
   return (
     <div className="w-full h-full flex justify-center items-center p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl bg-white p-6 rounded shadow-md relative">
+      <div className="w-full max-w-10xl bg-white p-6 rounded shadow-md relative">
         {/* Close Button */}
         <button
           onClick={handleCloseForm}
@@ -61,7 +67,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
+                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
                 placeholder="Customer name"
               />
             </div>
@@ -71,7 +77,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
+                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
               />
             </div>
             <div>
@@ -80,7 +86,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 type="text"
                 value={customerAddress}
                 onChange={(e) => setCustomerAddress(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
+                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
                 placeholder="Customer address"
               />
             </div>
@@ -90,24 +96,28 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 type="date"
                 value={validity}
                 onChange={(e) => setValidity(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
+                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
               />
             </div>
           </div>
 
-          {/* Table Header (Hidden on mobile) */}
-          <div className="hidden sm:grid grid-cols-5 bg-gray-200 font-medium text-black px-2 py-1 rounded">
+          {/* Table Header */}
+          <div className="hidden sm:grid grid-cols-6 bg-gray-200 font-medium text-black px-2 py-1 rounded">
             <div>No</div>
             <div>Description</div>
             <div>Quantity</div>
             <div>Unit Price</div>
             <div>Total</div>
+            <div>Action</div>
           </div>
 
           {/* Line Items */}
           {items.map((item, index) => (
-            <div key={index} className="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-4 py-2 border-b border-gray-200 items-center">
-              <div className="font-semibold">{index + 1}</div>
+            <div
+              key={index}
+              className="grid grid-cols-1 sm:grid-cols-6 gap-2 sm:gap-4 py-2 border-b border-gray-200 items-center"
+            >
+              <div className="font-semibold text-black">{index + 1}</div>
               <input
                 type="text"
                 value={item.description}
@@ -130,9 +140,18 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 placeholder="Unit Price"
               />
               <div className="text-black">{getTotal(item).toFixed(2)}</div>
+              <button
+                type="button"
+                onClick={() => handleRemoveItem(index)}
+                className="text-red-600 font-bold text-lg hover:text-red-800"
+                title="Remove item"
+              >
+                ×
+              </button>
             </div>
           ))}
 
+          {/* Add New Item */}
           <button
             type="button"
             onClick={handleAddItem}
