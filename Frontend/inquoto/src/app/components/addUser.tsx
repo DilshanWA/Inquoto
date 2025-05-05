@@ -30,19 +30,9 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
           X
         </button>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-10 mt-4">
           {/* User Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-black font-medium">User Name</label>
-              <input
-                type="text"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-                placeholder="User name"
-              />
-            </div>
+          <div className="gap-4">
             <div>
               <label className="block text-black font-medium">Email</label>
               <input
