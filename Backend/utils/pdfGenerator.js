@@ -1,6 +1,10 @@
 const fs = require("fs");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+
+const { bucket } = require("../config/firebase");
+
 const { bucket } = require("../config/firebase"); // Optional if using Firebase Storage
+
 
 async function generatePDF(data) {
   const pdfDoc = await PDFDocument.create();

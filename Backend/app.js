@@ -9,8 +9,8 @@ app.use(cors({ origin: true }));
 app.use(express.json());
 
 // app.use("/api/invoices", invoiceRoutes);
-app.post("/register", Register); 
-app.post("/login", Login); 
+app.post("/api/register", Register); 
+app.post("/api/login", Login); 
 
 
 

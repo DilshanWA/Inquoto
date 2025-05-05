@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import InvoiceForm from '../components/InvoiceForm'; // Assuming the form is in the same directory
+import ProtectedLayout from '../components/ProtectedLayout';
 
 export default function InvoicePage() {
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -15,7 +16,8 @@ export default function InvoicePage() {
   };
 
   return (
-    <div className="p-6">
+    <ProtectedLayout>
+      <div className="p-6">
       {/* Button to create invoice */}
       {!isFormVisible && (
         <button
@@ -29,5 +31,7 @@ export default function InvoicePage() {
       {/* Invoice form appears only when isFormVisible is true */}
       {isFormVisible && <InvoiceForm handleCloseForm={handleCloseForm} />}
     </div>
+    </ProtectedLayout>
+    
   );
 }
