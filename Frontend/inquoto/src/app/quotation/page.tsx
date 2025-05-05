@@ -1,7 +1,10 @@
 'use client';
 
+
+
 import { useState } from 'react';
 import InvoiceForm from '../components/InvoiceForm';
+import ProtectedLayout from '../components/ProtectedLayout';
 
 export default function QuotationPage() {
    const [isFormVisible, setIsFormVisible] = useState(false);
@@ -15,7 +18,8 @@ export default function QuotationPage() {
      };
    
      return (
-       <div className="p-6">
+    <ProtectedLayout>
+      <div className="p-6">
          {/* Button to create invoice */}
          {!isFormVisible && (
            <button
@@ -29,6 +33,8 @@ export default function QuotationPage() {
          {/* Invoice form appears only when isFormVisible is true */}
          {isFormVisible && <InvoiceForm handleCloseForm={handleCloseForm} />}
        </div>
+    </ProtectedLayout>
+       
      );
   }
   
