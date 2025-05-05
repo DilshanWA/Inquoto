@@ -8,5 +8,6 @@ admin.initializeApp({
   databaseURL: "https://inventrydb-d9b53-default-rtdb.firebaseio.com"
 });
 
+const db = admin.firestore();
 
-module.exports = { admin };
+module.exports = { admin ,db };
