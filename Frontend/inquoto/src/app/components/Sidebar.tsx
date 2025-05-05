@@ -1,34 +1,34 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-
-const navItems = [
-  { name: 'Overview', href: '/overview' },
-  { name: 'Quotation', href: '/quotation' },
-  { name: 'Invoice', href: '/invoice' },
-  { name: 'Admins', href: '/admins' },
-];
-
 const Sidebar = () => {
-
   const router = useRouter();
+  const pathname = usePathname();
+  const [isSuperUser, setIsSuperUser] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('isSuperUser');
+      setIsSuperUser(role === 'true');
+    }
+  }, []);
 
   const handleLogout = () => {
-    // Clear token (or any auth state)
     localStorage.removeItem('token');
-
-    // Optional: call logout API if using sessions/cookies
-    // await fetch('http://localhost:5000/api/logout', { method: 'POST', credentials: 'include' });
-
-    // Redirect to login page
+    localStorage.removeItem('isSuperUser');
     router.push('/');
   };
 
-
-  const pathname = usePathname();
+  // Filter navigation items
+  const navItems = [
+    { name: 'Overview', href: '/overview' },
+    { name: 'Quotation', href: '/quotation' },
+    { name: 'Invoice', href: '/invoice' },
+    ...(isSuperUser ? [{ name: 'Admins', href: '/admins' }] : []),
+  ];
 
   return (
     <div className="bg-[#050A30] text-white h-screen w-64 flex flex-col justify-between">
@@ -54,13 +54,12 @@ const Sidebar = () => {
         </nav>
       </div>
       <div className="px-4 mb-4">
-      <button
-        onClick={handleLogout}
-        className="w-full flex items-center bg-gray-700 rounded px-3 py-2 hover:bg-gray-600"
-      >
-        <span className="mr-2">🔒</span> Logout
-      </button>
-
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center bg-gray-700 rounded px-3 py-2 hover:bg-gray-600"
+        >
+          <span className="mr-2">🔒</span> Logout
+        </button>
         <p className="text-xs mt-2">Powered by NeoMac Engineering</p>
       </div>
     </div>
