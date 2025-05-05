@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+import { useRouter } from 'next/navigation';
+
 
 const navItems = [
   { name: 'Overview', href: '/overview' },
@@ -11,6 +13,21 @@ const navItems = [
 ];
 
 const Sidebar = () => {
+
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear token (or any auth state)
+    localStorage.removeItem('token');
+
+    // Optional: call logout API if using sessions/cookies
+    // await fetch('http://localhost:5000/api/logout', { method: 'POST', credentials: 'include' });
+
+    // Redirect to login page
+    router.push('/');
+  };
+
+
   const pathname = usePathname();
 
   return (
@@ -37,9 +54,13 @@ const Sidebar = () => {
         </nav>
       </div>
       <div className="px-4 mb-4">
-        <button className="w-full flex items-center bg-gray-700 rounded px-3 py-2">
-          <span className="mr-2">🔒</span> Logout
-        </button>
+      <button
+        onClick={handleLogout}
+        className="w-full flex items-center bg-gray-700 rounded px-3 py-2 hover:bg-gray-600"
+      >
+        <span className="mr-2">🔒</span> Logout
+      </button>
+
         <p className="text-xs mt-2">Powered by NeoMac Engineering</p>
       </div>
     </div>
