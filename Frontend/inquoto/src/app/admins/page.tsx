@@ -15,7 +15,6 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <p className="mt-4">Welcome to the admin dashboard. Here you can manage users, settings, and more.</p>
 
-        {/* Button to trigger modal */}
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
           onClick={() => setShowModal(true)}
@@ -23,10 +22,9 @@ export default function AdminPage() {
           Add New User
         </button>
 
-        {/* Modal for user registration */}
         {showModal && (
             <div>
-            <UserForm handleCloseForm={closeModal} />  {/* Pass closeModal to UserForm */}
+            <UserForm handleCloseForm={closeModal} /> 
           </div>
         )}
       </div>

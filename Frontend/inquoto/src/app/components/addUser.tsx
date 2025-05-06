@@ -15,8 +15,7 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic to handle form submission, like creating a new user
-    // If using Firebase, you could integrate Firebase Auth for user creation here
+    
   };
 
   return (
