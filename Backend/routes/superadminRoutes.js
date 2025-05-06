@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
-const { Login, getProfile } = require("../controllers/userController");
+const { Login,Register, getProfile } = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
 const { addAdminUser, RemoveAdmin } = require("../utils/superAdminFun");
+
+
+//Register
+router.post("/Register",Register );
 
 //login
 router.post("/login", Login);
@@ -72,7 +76,9 @@ router.get("/getAll-invoices", authMiddleware, roleMiddleware("super_admin"), as
 
 router.post("/Create-invoices", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
 
-
+  const {name ,price ,status } = req.body;
+  const uid = req.uid;
+  const invoicedetails= {name ,price ,status, uid} 
   try {
     const result = await createInvoice(invoicedetails);
     res.status(200).json(result);
@@ -84,10 +90,10 @@ router.post("/Create-invoices", authMiddleware, roleMiddleware("super_admin"), a
 
 
 })
-router.delete("/delete-invoices", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
+router.delete("/delete-invoices:id", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
 
   try {
-    const result = await getAllInvoices(id);
+    const result = await deleteInvoice(req.params.id);
     res.status(200).json(result);
 
 
