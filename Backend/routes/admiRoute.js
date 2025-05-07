@@ -17,6 +17,7 @@ router.get("/admin-dashboard", authMiddleware, roleMiddleware("admin"), (req, re
 
 
 //Create invoice
+//Create invoice
 router.post("/Create-invoices", authMiddleware, roleMiddleware("admin"), async (req, res) => {
     const {name , price} = req.body;
     const uid = req.uid;
