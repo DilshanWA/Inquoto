@@ -6,6 +6,7 @@ interface LineItem {
   description: string;
   quantity: number;
   unitPrice: number;
+  total: number;
 }
 
 interface InvoiceFormProps {
@@ -18,18 +19,17 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
   const [date, setDate] = useState('');
   const [validity, setValidity] = useState('');
   const [items, setItems] = useState<LineItem[]>([
-    { description: '', quantity: 0, unitPrice: 0 },
+    { description: '', quantity: 0, unitPrice: 0, total: 0 },
   ]);
   const [note, setNote] = useState('');
   const [terms, setTerms] = useState('');
 
   const handleAddItem = () => {
-    setItems([...items, { description: '', quantity: 0, unitPrice: 0 }]);
+    setItems([...items, { description: '', quantity: 0, unitPrice: 0, total: 0 }]);
   };
 
   const handleRemoveItem = (index: number) => {
-    const updatedItems = [...items];
-    updatedItems.splice(index, 1);
+    const updatedItems = items.filter((_, i) => i !== index);
     setItems(updatedItems);
   };
 
@@ -42,157 +42,211 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
     } else if (field === 'unitPrice') {
       updatedItems[index].unitPrice = Number(value);
     }
+    updatedItems[index].total = updatedItems[index].quantity * updatedItems[index].unitPrice;
     setItems(updatedItems);
   };
 
-  const getTotal = (item: LineItem) => item.quantity * item.unitPrice;
+  const getTotalInvoice = () => {
+    return items.reduce((total, item) => total + item.total, 0);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const invoiceData = {
+      customerName,
+      customerAddress,
+      date,
+      validity,
+      items,
+      note,
+      terms,
+      total: getTotalInvoice(),
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/api/invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(invoiceData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Invoice submitted:', result);
+        handleCloseForm();
+      } else {
+        console.error('Failed to submit invoice');
+      }
+    } catch (error) {
+      console.error('Error submitting invoice:', error);
+    }
+  };
 
   return (
-    <div className="w-full h-full flex justify-center items-center p-4 overflow-y-auto">
-      <div className="w-full max-w-10xl bg-white p-6 rounded shadow-md relative">
-        {/* Close Button */}
-        <button
-          onClick={handleCloseForm}
-          className="absolute top-2 right-2 sm:top-4 sm:right-4 text-xl font-bold text-gray-700 hover:text-gray-900"
-        >
-          X
-        </button>
-
-        <form className="space-y-6 mt-4">
-          {/* Customer Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-black font-medium">Customer Name</label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-                placeholder="Customer name"
-              />
-            </div>
-            <div>
-              <label className="block text-black font-medium">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-black font-medium">Customer Address</label>
-              <input
-                type="text"
-                value={customerAddress}
-                onChange={(e) => setCustomerAddress(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-                placeholder="Customer address"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Validity</label>
-              <input
-                type="date"
-                value={validity}
-                onChange={(e) => setValidity(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-              />
-            </div>
-          </div>
-
-          {/* Table Header */}
-          <div className="hidden sm:grid grid-cols-6 bg-gray-200 font-medium text-black px-2 py-1 rounded">
-            <div>No</div>
-            <div>Description</div>
-            <div>Quantity</div>
-            <div>Unit Price</div>
-            <div>Total</div>
-            <div>Action</div>
-          </div>
-
-          {/* Line Items */}
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-1 sm:grid-cols-6 gap-2 sm:gap-4 py-2 border-b border-gray-200 items-center"
-            >
-              <div className="font-semibold text-black">{index + 1}</div>
-              <input
-                type="text"
-                value={item.description}
-                onChange={(e) => handleChangeItem(index, 'description', e.target.value)}
-                className="border border-gray-300 text-gray-700 px-2 py-1 rounded"
-                placeholder="Description"
-              />
-              <input
-                type="number"
-                value={item.quantity}
-                onChange={(e) => handleChangeItem(index, 'quantity', e.target.value)}
-                className="border border-gray-300 text-gray-700 px-2 py-1 rounded"
-                placeholder="Qty"
-              />
-              <input
-                type="number"
-                value={item.unitPrice}
-                onChange={(e) => handleChangeItem(index, 'unitPrice', e.target.value)}
-                className="border border-gray-300 text-gray-700 px-2 py-1 rounded"
-                placeholder="Unit Price"
-              />
-              <div className="text-black">{getTotal(item).toFixed(2)}</div>
-              <button
-                type="button"
-                onClick={() => handleRemoveItem(index)}
-                className="text-red-600 font-bold text-lg hover:text-red-800"
-                title="Remove item"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-
-          {/* Add New Item */}
+    <>
+     <div className="fixed  h-screen inset-0 bg-black opacity-70 transition-opacity" />
+      <div className="flex  items-center justify-center p-4 text-center -mt-30">
+        <div className="relative w-full max-w-7xl transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all">
           <button
-            type="button"
-            onClick={handleAddItem}
-            className="bg-[#050A30] text-white px-4 py-2 rounded hover:opacity-90"
+            onClick={handleCloseForm}
+            className="absolute top-4 right-4 z-10 rounded-md bg-gray-100 p-1 text-gray-400 hover:text-gray-500"
           >
-            + Add New
+            <span className="sr-only">Close</span>
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
 
-          {/* Notes and Terms */}
-          <div>
-            <label className="block font-medium">Note</label>
-            <textarea
-              className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
-              rows={3}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Add any special notes here..."
-            />
-          </div>
-          <div>
-            <label className="block font-medium">Terms & Conditions</label>
-            <textarea
-              className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
-              rows={3}
-              value={terms}
-              onChange={(e) => setTerms(e.target.value)}
-              placeholder="Write your terms & conditions..."
-            />
-          </div>
+          <form className="space-y-6 p-6" onSubmit={handleSubmit}>
+            {/* Customer Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-black font-medium">Customer Name</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
+                  placeholder="Customer name"
+                />
+              </div>
+              <div>
+                <label className="block text-black font-medium">Date</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
+                />
+              </div>
+              <div>
+                <label className="block text-black font-medium">Customer Address</label>
+                <input
+                  type="text"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
+                  placeholder="Customer address"
+                />
+              </div>
+              <div>
+                <label className="block font-medium">Validity</label>
+                <input
+                  type="date"
+                  value={validity}
+                  onChange={(e) => setValidity(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
+                />
+              </div>
+            </div>
 
-          {/* Submit Button */}
-          <div className="text-right">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-            >
-              Generate Invoice
-            </button>
-          </div>
-        </form>
+            {/* Table Header */}
+            <div className="hidden sm:grid grid-cols-12 bg-gray-200 font-medium text-black px-2 py-1 rounded text-sm">
+              <div className="col-span-1 text-center">No</div>
+              <div className="col-span-5">Description</div>
+              <div className="col-span-2 text-center">Qty</div>
+              <div className="col-span-2 text-center">Price</div>
+              <div className="col-span-1 text-center">Total</div>
+              <div className="col-span-1 text-center">Del</div>
+            </div>
+
+            {/* Line Items */}
+            {items.map((item, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 sm:grid-cols-12 gap-2 py-1 px-2 items-center text-sm"
+              >
+                <div className="col-span-1 text-center">{index + 1}</div>
+                <input
+                  type="text"
+                  value={item.description}
+                  onChange={(e) => handleChangeItem(index, 'description', e.target.value)}
+                  className="col-span-5 border border-gray-300 rounded-md py-3 px-2"
+                  placeholder="Description"
+                />
+                <input
+                  type="number"
+                  value={item.quantity}
+                  onChange={(e) => handleChangeItem(index, 'quantity', e.target.value)}
+                  className="col-span-2 border border-gray-300 rounded-md py-3 px-2 text-center"
+                  placeholder="Qty"
+                />
+                <input
+                  type="number"
+                  value={item.unitPrice}
+                  onChange={(e) => handleChangeItem(index, 'unitPrice', e.target.value)}
+                  className="col-span-2 border border-gray-300 rounded-md py-3 px-2 text-center"
+                  placeholder="Price"
+                />
+                <div className="col-span-1 text-center text-black">
+                  Rs{item.total.toFixed(2)}
+                </div>
+                <div className="col-span-1 text-center">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem(index)}
+                    className="text-red-500 hover:text-red-700 hover:text-red cursor-pointer"
+                    title="Delete row"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Total */}
+            <div className="flex justify-end font-semibold text-black mt-4 text-lg">
+              <span>Total: Rs {getTotalInvoice().toFixed(2)}</span>
+            </div>
+
+            {/* Add New Item */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleAddItem}
+                className="mt-2 bg-[#050A30] text-white px-4 py-2 rounded-md hover:opacity-90"
+              >
+                + Add New
+              </button>
+            </div>
+
+            {/* Note */}
+            <div>
+              <label className="block font-medium">Note</label>
+              <textarea
+                className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
+                rows={3}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Add any special notes here..."
+              />
+            </div>
+
+            {/* Terms */}
+            <div>
+              <label className="block font-medium">Terms & Conditions</label>
+              <textarea
+                className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
+                rows={3}
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
+                placeholder="Write your terms & conditions..."
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end pt-4 mt-10">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700"
+              >
+                Generate Invoice
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import InvoiceForm from '@/app/components/InvoiceForm';
+import DocumentTable from '@/app/components/dataTable';
 
 export default function InvoicePage() {
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -16,19 +17,21 @@ export default function InvoicePage() {
 
   return (
       <div className="p-6">
-          <h1 className="text-2xl mb-6 font-bold">Quotations Page</h1>
-      
+        <h1 className="text-2xl mb-6 font-bold">Invoices Page</h1>
+
+        <DocumentTable type="invoice" />
+
         {!isFormVisible && (
           <button
             onClick={handleCreateInvoiceClick}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Create Invoice
           </button>
         )}
 
         {/* Invoice form appears only when isFormVisible is true */}
-        {isFormVisible && <InvoiceForm handleCloseForm={handleCloseForm} />}
+        {isFormVisible && <InvoiceForm type="invoice" handleCloseForm={handleCloseForm}  />}
     </div>  
   );
 }
