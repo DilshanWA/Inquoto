@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 
 
 const navItems = [
-  { name: 'Overview', href: '/overview' },
-  { name: 'Quotation', href: '/quotation' },
-  { name: 'Invoice', href: '/invoice' },
-  { name: 'Admins', href: '/admins' },
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Quotation', href: '/dashboard/quotation' },
+  { name: 'Invoice', href: '/dashboard/invoice' },
+  { name: 'Admins', href: '/dashboard/admins' },
 ];
 
 const Sidebar = () => {
@@ -19,11 +19,6 @@ const Sidebar = () => {
   const handleLogout = () => {
     // Clear token (or any auth state)
     localStorage.removeItem('token');
-
-    // Optional: call logout API if using sessions/cookies
-    // await fetch('http://localhost:5000/api/logout', { method: 'POST', credentials: 'include' });
-
-    // Redirect to login page
     router.push('/');
   };
 
