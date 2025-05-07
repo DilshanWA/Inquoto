@@ -4,7 +4,7 @@ export default function Topbar() {
         <input
           type="text"
           placeholder="Search anything"
-          className="bg-gray-100 px-4 py-2 rounded w-1/2"
+          className=" text-black   placeholder:text-gray-400 bg-gray-100 px-4 py-3 rounded w-1/2"
         />
         <div className="flex items-center space-x-4">
           <div className="relative">

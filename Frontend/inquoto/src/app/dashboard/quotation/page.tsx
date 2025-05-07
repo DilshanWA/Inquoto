@@ -1,7 +1,9 @@
 'use client';
 
+
+
 import { useState } from 'react';
-import InvoiceForm from '../components/InvoiceForm';
+import InvoiceForm from '@/app/components/InvoiceForm';
 
 export default function QuotationPage() {
    const [isFormVisible, setIsFormVisible] = useState(false);
@@ -15,8 +17,8 @@ export default function QuotationPage() {
      };
    
      return (
-       <div className="p-6">
-         {/* Button to create invoice */}
+      <div className="p-6">
+          <h1 className="text-2xl mb-6 font-bold">Invoice Page</h1>
          {!isFormVisible && (
            <button
              onClick={handleCreateInvoiceClick}
@@ -28,7 +30,7 @@ export default function QuotationPage() {
    
          {/* Invoice form appears only when isFormVisible is true */}
          {isFormVisible && <InvoiceForm handleCloseForm={handleCloseForm} />}
-       </div>
+       </div>   
      );
   }
   
