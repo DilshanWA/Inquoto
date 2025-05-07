@@ -13,10 +13,45 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
   const [password, setPassword] = useState('');
   const [note, setNote] = useState('');
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
+    const userData = {
+      name: userName,
+      email,
+      role,
+      password,
+      note,
+    };
+  
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert('User added successfully!');
+        setUserName('');
+        setEmail('');
+        setPassword('');
+        setRole('user');
+        setNote('');
+        handleCloseForm();
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+      alert('An error occurred while adding the user.');
+    }
   };
+  
 
   return (
     <div className="w-max h-full flex justify-center items-center p-4 overflow-y-auto">
@@ -51,7 +86,6 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
-                <option value="superadmin">Super Admin</option>
               </select>
             </div>
           </div>
