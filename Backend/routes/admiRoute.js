@@ -16,6 +16,7 @@ router.get("/admin-dashboard", authMiddleware, roleMiddleware("admin"), (req, re
 
 
 
+
 //Create invoice
 //Create invoice
 router.post("/Create-invoices", authMiddleware, roleMiddleware("admin"), async (req, res) => {
@@ -96,5 +97,6 @@ router.post("/Create-quotations", authMiddleware, roleMiddleware("admin"), async
       res.status(500).json({ success: false, message: error.message });
     }
   });
+
 
 module.exports = router;
