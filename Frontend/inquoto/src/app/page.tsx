@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,7 +9,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPasswordTyped, setIsPasswordTyped] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -22,22 +21,22 @@ export default function LoginPage() {
     setIsPasswordTyped(!!value);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // This is crucial!
-    router.push('/overview');
-  };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push('/dashboard');
   
+  };
 
   return (
     <div className="h-screen flex items-center bg-green-100">
       <div className="h-screen w-1/2 bg-white">
         <div className="flex flex-col items-center justify-center h-full">
           <div className="justify-center text-left mb-10 w-1/2">
-            <h1 className="text-4xl font-bold text-gray-800">Welcome NecMac System</h1>
+            <h1 className="text-4xl font-bold text-gray-800">Welcome to NecMac System</h1>
             <p className="text-black mt-2">Please enter your login credentials.</p>
           </div>
 
-          <form className="flex flex-col space-y-5 w-1/2" onSubmit={handleSubmit}>
+          <form className="flex flex-col space-y-5 w-1/2" onSubmit={handleLogin}>
             <input
               type="email"
               placeholder="Email"
@@ -65,23 +64,21 @@ export default function LoginPage() {
                     onChange={togglePassword}
                     className="mr-2"
                   />
-                  <label htmlFor="showPassword" className="text-sm text-gray-600">
-                    Show
-                  </label>
+                  <label htmlFor="showPassword" className="text-sm text-gray-600">Show</label>
                 </div>
               )}
             </div>
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
-            {success && <p className="text-green-600 text-sm">{success}</p>}
 
             <button
               type="submit"
               className="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 transition"
+              disabled={loading}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
-            <p className='text-gray-500 font-light text-center'>powered by NecMac Engineering pvt. </p>
+            <p className='text-gray-500 font-light text-center'>Powered by NecMac Engineering Pvt.</p>
           </form>
         </div>
       </div>

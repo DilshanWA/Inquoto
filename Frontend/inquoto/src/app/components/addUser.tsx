@@ -19,7 +19,7 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-center p-4 overflow-y-auto">
+    <div className="w-max h-full flex justify-center items-center p-4 overflow-y-auto">
       <div className="w-full max-w-10xl bg-white p-6 rounded shadow-md relative">
         {/* Close Button */}
         <button
@@ -31,8 +31,8 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
 
         <form onSubmit={handleSubmit} className="space-y-10 mt-4">
           {/* User Details */}
-          <div className="gap-4">
-            <div>
+          <div className="gap-10">
+            <div className='mb-5'>
               <label className="block text-black font-medium">Email</label>
               <input
                 type="email"
@@ -54,25 +54,15 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
                 <option value="superadmin">Super Admin</option>
               </select>
             </div>
-            <div>
-              <label className="block text-black font-medium">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-                placeholder="User password"
-              />
-            </div>
           </div>
 
           {/* Submit Button */}
-          <div className="text-right">
+          <div className="text-left">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 cursor-pointer text-white px-6 py-2 rounded hover:bg-blue-700"
             >
-              Create User
+              Add New User
             </button>
           </div>
         </form>

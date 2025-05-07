@@ -4,7 +4,7 @@ import './globals.css'; // 👈 Add this line
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-white text-black">
+      <body className="text-black">
         {children}
       </body>
     </html>
