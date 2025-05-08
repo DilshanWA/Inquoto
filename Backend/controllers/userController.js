@@ -9,56 +9,72 @@ require('dotenv').config();
 //Register user
 
 const Register = async (req, res, next) => {
-  const { email, password} = req.body;
+  const { name, email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
+  if (!email || !password || !name) {
+    return res.status(400).json({ message: "Email, name, and password are required" });
   }
+
   try {
+    //  Determine role
+    const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
+
+    //  Check Firestore for existing user by email
+    const userDocSnap = await db.collection("users").where("email", "==", email).limit(1).get();
+
+    //  Allow super_admin even if not in Firestore
+    if (userDocSnap.empty && role !== "super_admin") {
+      return res.status(403).json({
+        message: "This email is not approved by Super Admin",
+      });
+    }
+
+    //  If user exists in Firestore, validate their role and state
+    if (!userDocSnap.empty) {
+      const userData = userDocSnap.docs[0].data();
+
+      if (userData.register_sate === true) {
+        return res.status(400).json({ 
+          register_sate:userData.register_sate,
+          message: role ==='super_admin'?'your superadmin account already created please login': "you already have account" });
+      }
+
+      if (userData.role !== "admin" && role !== "super_admin") {
+        return res.status(403).json({ message: "Unauthorized role" });
+      }
+    }
+
+    //  Create Firebase Auth user
     const userRecord = await admin.auth().createUser({
       email,
       password,
     });
-    
-    // super admin 
-    const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
 
-    const userData = createUserModel({
-
-        email:email,
-        uid:userRecord.uid,
-        name:userRecord.name,
-        role:role
-    })
-
+    //  Save or update Firestore user document
     await db.collection("users").doc(userRecord.uid).set({
-        email: email,
-        role: role,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-  
+      email,
+      name,
+      role,
+      register_sate: true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
 
     return res.status(201).json({
       message: "User created successfully",
       uid: userRecord.uid,
-      role: role
-     
+      role,
+      register_sate: true,
     });
-   
 
   } catch (error) {
-
     console.error("Firebase error:", error);
-
 
     return res.status(500).json({
       message: "Error: Registration failed",
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
-
-
 
 
 

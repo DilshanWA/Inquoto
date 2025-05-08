@@ -71,6 +71,7 @@ await transporter.sendMail({
         uid:user.uid,
         email:email,
         role: "admin",
+        register_sate:false,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
     })
 
