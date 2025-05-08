@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,11 +23,37 @@ export default function LoginPage() {
     setIsPasswordTyped(!!value);
   };
 
+
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    setLoading(true);
+    setError('');
   
+    try {
+      const response = await axios.post('http://localhost:5000/api/super-admin/login', {
+        email,
+        password
+      });
+  
+      //  You can also store a token or user data from response if needed
+      console.log("Login success:", response.data);
+  
+      router.push('/dashboard'); // Redirect on success
+    } catch (err: any) {
+      console.error("Login failed:", err);
+  
+      // Handle error message
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Login failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   return (
     <div className="h-screen flex items-center bg-green-100">

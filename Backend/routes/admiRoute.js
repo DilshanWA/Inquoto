@@ -65,10 +65,6 @@ router.put("/Update-invoices", authMiddleware, roleMiddleware("admin"), async (r
 
 
 
-
-
-
-
 // CREATE QUOTATION
 router.post("/Create-quotations", authMiddleware, roleMiddleware("admin"), async (req, res) => {
     try {
