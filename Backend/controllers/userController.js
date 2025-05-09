@@ -1,7 +1,7 @@
 const { default: axios } = require("axios");
 const { admin ,db} = require("../config/firebase");
 
-const createUserModel = require ("../models/usermodel");
+
 
 
 require('dotenv').config();
@@ -63,7 +63,7 @@ const Register = async (req, res, next) => {
       state : 'Acept'
     });
     
-
+    console.log('Registered.')
     return res.status(201).json({
       message: "User created successfully",
       uid: userRecord.uid,
@@ -88,11 +88,14 @@ const Register = async (req, res, next) => {
 //Login
 
 const Login = async (req, res, next) => {
+   
 
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
   }
+
+  const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
 
   try {
 
@@ -105,10 +108,11 @@ const Login = async (req, res, next) => {
       returnSecureToken: true,
     }
    );
-   console.log(response);
+   console.log("Login successful");
 
    return res.status(200).json({
     message: "Login successful",
+    role:role,
     idToken: response.data.idToken,
     uid: response.data.localId,
   

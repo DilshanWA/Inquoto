@@ -27,6 +27,7 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
 
       if (response.ok) {
         alert('User added successfully!');
+        console.log(response)
         setEmail('');
         handleCloseForm();
       } else {

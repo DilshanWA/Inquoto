@@ -7,7 +7,7 @@ interface User {
   name: string;
   email: string;
   role: string;
-  signUpDate: string;
+  date: string;
 }
 
 export default function UserTable() {
@@ -20,29 +20,52 @@ export default function UserTable() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/users');
-      const data = await res.json();
-      setUsers(data);
+      const token = localStorage.getItem('token'); // Get token from localStorage (or wherever you stored it)
+  
+      const response = await fetch('http://localhost:5000/api/super-admin/super-dashboard', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // 👈 Send token in header
+        },
+      });
+  
+      const data = await response .json();
+      setUsers(data.data);
+      console.log('data' ,data.data)
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
   };
+  
 
   const deleteUser = async (id: string) => {
     try {
+      const token = localStorage.getItem('token');
       const confirmed = window.confirm("Are you sure you want to delete this user?");
       if (!confirmed) return;
 
-      await fetch(`http://localhost:5000/api/users/${id}`, {
+      const res = await fetch(`http://localhost:5000/api/super-admin/delete-user/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
-
-      // Refresh list
-      setUsers((prev) => prev.filter((user) => user.id !== id));
+  
+      if (res.ok) {
+        // Refresh list only if deletion was successful
+        setUsers((prev) => prev.filter((user) => user.id !== id));
+        console.log('User deleted successfully');
+      } else {
+        const errorData = await res.json();
+        console.error('Failed to delete user:', errorData.message || 'Unknown error');
+      }
     } catch (error) {
       console.error('Error deleting user:', error);
     }
   };
+  
 
   return (
     <div className="p-4 w-full">
@@ -60,13 +83,13 @@ export default function UserTable() {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0 ? (
+            {users && users.length > 0 ? (
               users.map((user) => (
                 <tr key={user.id} className="border-t hover:bg-gray-50">
                   <td className="p-3">{user.name}</td>
                   <td className="p-3">{user.email}</td>
                   <td className="p-3 capitalize">{user.role}</td>
-                  <td className="p-3">{new Date(user.signUpDate).toLocaleDateString()}</td>
+                  <td className="p-3">{new Date(user.date).toLocaleDateString()}</td>
                   <td className="p-3">
                     <button
                       onClick={() => deleteUser(user.id)}
