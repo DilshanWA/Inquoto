@@ -20,6 +20,30 @@ const transporter = nodemailer.createTransport({
  * @param {string} email 
  */
 
+async function getadminDetails() {
+  try {
+    const snapshot = await db.collection("Adduser").get();
+
+    const admins = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    return {
+      success: true,
+      data: admins
+    };
+  } catch (error) {
+    console.error("Error fetching admin details:", error);
+    return {
+      success: false,
+      message: "Failed to fetch admin details",
+      error: error.message
+    };
+  }
+}
+
+
 
 
 
@@ -28,14 +52,16 @@ async function addAdminUser(email) {
   if (!email) throw new Error("Email is required");
    try{
     db.collection('Adduser').doc(email).set({
+      name:'admin',
       email:email,
       role:'Admin',
-      state: 'pending'
+      state: 'pending',
+      date:new Date()
     })
 
     // 4. Send login link via email
 await transporter.sendMail({
-  from: '"Inquoto Admin Team" <yourEmail@gmail.com>', // Replace with your app name and email
+  from: '"Inquoto Admin Team" <yourEmail@gmail.com>',
   to: email,
   subject: "Your Admin Access Link - Inquoto",
   html: `
@@ -45,7 +71,7 @@ await transporter.sendMail({
       <p style="color: #555;">
         You've been granted admin access to the Inquoto platform. Use the secure button below to sign in and manage your dashboard.
       </p>
-      <a href="${loginLink}" style="display: inline-block; margin: 20px 0; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+      <a href="${null}" style="display: inline-block; margin: 20px 0; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
         Click here to Login
       </a>
       <p style="color: #888; font-size: 14px;">Note: This link is valid for 24 hours and can only be used once.</p>
@@ -56,19 +82,8 @@ await transporter.sendMail({
 });
 
 
-    //user table update
-    await db.collection('users').doc(user.uid).set({
-        uid:user.uid,
-        email:email,
-        role: "admin",
-        register_sate:false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-    })
 
-    db.collection('Adduser').doc(email).update({
-      state:'Acept'
-    })
-
+     console.log('added')
     return { success: true, message: "Admin added and email sent" };
   } catch (err) {
     console.error("Error adding admin user:", err);
@@ -84,24 +99,44 @@ await transporter.sendMail({
 
 
 async function RemoveAdmin(email) {
-
   if (!email) throw new Error("Email is required");
 
   try {
-    // 1. Find user by email
-    const user = await admin.auth().getUserByEmail(email);
+    // 1. Get the user's document from 'adduser'
+    const userDoc = await db.collection("Adduser").doc(email).get();
 
-    // 2. Remove custom role (admin role) from Firebase Authentication
-    await admin.auth().setCustomUserClaims(user.uid, { role: null });
+    if (!userDoc.exists) {
+      throw new Error("User not found in adduser collection");
+    }
 
-    // 3. Optionally, delete user from Firestore if needed
-    await db.collection("users").doc(user.uid).delete();
+    const userData = userDoc.data();
+    let user = null;
 
-    await db.collection("adduser").doc(user.email).update(
-      {state:'removed'}
-    );
+    try {
+      // Try to get user from Firebase Auth
+      user = await admin.auth().getUserByEmail(email);
 
-    // 4. Send email notification (optional)
+      if (userData.state === 'accept') {
+        // Remove custom claims
+        await admin.auth().setCustomUserClaims(user.uid, { role: null });
+
+        // Delete from 'users' collection
+        await db.collection("users").doc(user.uid).delete();
+
+        // Delete from Firebase Auth (optional)
+        await admin.auth().deleteUser(user.uid);
+      }
+    } catch (error) {
+      if (userData.state === 'accept') {
+        throw new Error("User not found in Firebase Auth, but marked as accepted");
+      }
+      // if pending, continue silently
+    }
+
+    // 3. Delete from 'adduser' collection
+    await db.collection("Adduser").doc(email).delete();
+
+    // 4. Send notification email
     await transporter.sendMail({
       from: '"Your App Admin" <yourEmail@gmail.com>',
       to: email,
@@ -119,6 +154,8 @@ async function RemoveAdmin(email) {
     throw new Error("Failed to remove admin");
   }
 }
+
+
 
 
 
@@ -381,4 +418,5 @@ module.exports = {
   addAdminUser , RemoveAdmin,
   getAllInvoices,createInvoice ,deleteInvoice,updateInvoice,
   createQuotation,getAllQuotations,updateQuotation,deleteQuotation,
+  getadminDetails
 };
