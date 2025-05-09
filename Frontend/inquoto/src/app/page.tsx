@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
@@ -23,6 +23,12 @@ export default function LoginPage() {
     setIsPasswordTyped(!!value);
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      router.replace('/dashboard');
+    }
+  }, []);
 
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,6 +44,10 @@ export default function LoginPage() {
   
       //  You can also store a token or user data from response if needed
       console.log("Login success:", response.data);
+      localStorage.setItem('role', response.data.role); // Store role in local storage
+      localStorage.setItem('token', response.data.idToken); // Store token in local storage
+
+
   
       router.push('/dashboard'); // Redirect on success
     } catch (err: any) {
