@@ -7,41 +7,27 @@ interface UserFormProps {
 }
 
 export default function UserForm({ handleCloseForm }: UserFormProps) {
-  const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('user');
-  const [password, setPassword] = useState('');
-  const [note, setNote] = useState('');
-  
+  const token = localStorage.getItem('token')
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    const userData = {
-      name: userName,
-      email,
-      role,
-      password,
-      note,
-    };
-  
+
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('http://localhost:5000/api/super-admin/add-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ email }),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         alert('User added successfully!');
-        setUserName('');
         setEmail('');
-        setPassword('');
-        setRole('user');
-        setNote('');
         handleCloseForm();
       } else {
         alert(`Error: ${result.message}`);
@@ -51,52 +37,37 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
       alert('An error occurred while adding the user.');
     }
   };
-  
 
   return (
     <div className="w-max h-full flex justify-center items-center p-4 overflow-y-auto">
-      <div className="w-full max-w-10xl bg-white p-6 rounded shadow-md relative">
+      <div className="w-full max-w-md bg-white p-6 rounded shadow-md relative">
         {/* Close Button */}
         <button
           onClick={handleCloseForm}
-          className="absolute top-2 right-2 sm:top-4 sm:right-4 text-xl font-bold text-gray-700 hover:text-gray-900"
+          className="absolute top-2 right-2 text-xl font-bold text-gray-700 hover:text-gray-900"
         >
           X
         </button>
 
-        <form onSubmit={handleSubmit} className="space-y-10 mt-4">
-          {/* User Details */}
-          <div className="gap-10">
-            <div className='mb-5'>
-              <label className="block text-black font-medium">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-                placeholder="User email"
-              />
-            </div>
-            <div>
-              <label className="block text-black font-medium">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="border border-gray-300 text-gray-700 w-sm px-3 py-2 rounded"
-              >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <div>
+            <label className="block text-black font-medium mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border border-gray-300 text-gray-700 w-full px-3 py-2 rounded"
+              placeholder="User email"
+              required
+            />
           </div>
 
-          {/* Submit Button */}
-          <div className="text-left">
+          <div>
             <button
               type="submit"
-              className="bg-blue-600 cursor-pointer text-white px-6 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
             >
-              Add New User
+              Add User
             </button>
           </div>
         </form>

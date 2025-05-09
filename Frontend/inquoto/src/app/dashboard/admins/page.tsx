@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UserForm from '@/app/components/addUser';  // Import the CreateUser component
+import UserTable from '@/app/components/usersTable';
 
 export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
@@ -39,6 +40,10 @@ export default function AdminPage() {
             <UserForm handleCloseForm={closeModal} /> 
           </div>
         )}
+
+        <UserTable/>
+
+
       </div>
     </div>
   );
