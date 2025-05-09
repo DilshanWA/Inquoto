@@ -26,22 +26,12 @@ const transporter = nodemailer.createTransport({
 
 async function addAdminUser(email) {
   if (!email) throw new Error("Email is required");
-
-  try {
-    // 1. Find or Create the user in Firebase
-    let user;
-    try {
-      user = await admin.auth().getUserByEmail(email);
-    } catch (error) {
-      user = await admin.auth().createUser({ email });
-    }
-
-    // 2. Set custom role = admin
-    await admin.auth().setCustomUserClaims(user.uid, { role: "admin" });
-
-    // Generate custom token
-    const token = await admin.auth().createCustomToken(user.uid);
-    const loginLink = `${LOGIN_REDIRECT_URL}?token=${token}`;
+   try{
+    db.collection('Adduser').doc(email).set({
+      email:email,
+      role:'Admin',
+      state: 'pending'
+    })
 
     // 4. Send login link via email
 await transporter.sendMail({
@@ -75,6 +65,10 @@ await transporter.sendMail({
         createdAt: admin.firestore.FieldValue.serverTimestamp()
     })
 
+    db.collection('Adduser').doc(email).update({
+      state:'Acept'
+    })
+
     return { success: true, message: "Admin added and email sent" };
   } catch (err) {
     console.error("Error adding admin user:", err);
@@ -102,6 +96,10 @@ async function RemoveAdmin(email) {
 
     // 3. Optionally, delete user from Firestore if needed
     await db.collection("users").doc(user.uid).delete();
+
+    await db.collection("adduser").doc(user.email).update(
+      {state:'removed'}
+    );
 
     // 4. Send email notification (optional)
     await transporter.sendMail({
