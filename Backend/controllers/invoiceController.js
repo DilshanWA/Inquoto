@@ -1,109 +1,56 @@
-const { db } = require("../config/firebase");
-const { v4: uuidv4 } = require("uuid");
 
-//  Create
-const createInvoice = async (req, res) => {
+const {admin,db} = require("../config/firebase");
+const nodemailer = require("nodemailer");
+
+require('dotenv').config();
+
+
+
+
+
+
+
+//Create invoice
+
+async function createInvoice(invoiceData,uid) {
+  if (!invoiceData || !invoiceData.customerName || !invoiceData.customerAddress || invoiceData.date || invoiceData.items || invoiceData.terms || invoiceData.total) {
+    throw new Error("Invoice data is required: customerName and amount are mandatory");
+  }
+
   try {
-    const id = uuidv4();
-    const invoiceData = {
-      id,
-      ...req.body,
-      createdBy: req.user.uid,
-      createdAt: new Date(),
+    // 1. Generate a unique invoice ID using the current date and time (format: YYYYMMDDHHMM)
+    const now = new Date();
+    const invoiceId = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // 2. Add a new invoice document to the "invoices" collection with the generated invoice ID
+    const newInvoiceRef = await db.collection("invoices").doc(invoiceId).set({
+      ...invoiceData, // Spread the invoice data from the request
+      createdAt: new Date(), // Timestamp when the invoice is created
+      status: "pending", // Default status
+    });
+
+    db.collection('invoices').doc(invoiceId).set({
+        invoiceId: invoiceId,
+        satatus : invoiceData.customerName,
+        userID :uid
+    })
+
+    // 3. Return the new invoice's document ID and data
+    return {
+      success: true,
+      message: "Invoice created successfully",
+      invoice: {
+        id: invoiceId, // Use the custom invoice ID
+        ...invoiceData,
+        createdAt: new Date(), // Add createdAt timestamp
+        status: "pending", // Default status
+      },
     };
-    await db.collection("invoices").doc(id).set(invoiceData);
-    res.status(201).json({ message: "Invoice created", invoice: invoiceData });
   } catch (error) {
-    res.status(500).json({ message: "Error creating invoice", error: error.message });
+    console.error("Error creating invoice:", error);
+    throw new Error("Failed to create invoice");
   }
-};
+}
 
-//  Read All
-const getInvoices = async (req, res) => {
-  try {
-    const snapshot = await db.collection("invoices").get();
-    const invoices = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (req.user.role === "superadmin" || data.createdBy === req.user.uid) {
-        invoices.push(data);
-      }
-    });
-    res.status(200).json(invoices);
-  } catch (error) {
-    res.status(500).json({ message: "Error getting invoices", error: error.message });
-  }
-};
 
-//  Read by ID
-const getInvoiceById = async (req, res) => {
-  try {
-    const doc = await db.collection("invoices").doc(req.params.id).get();
-    if (!doc.exists) return res.status(404).json({ message: "Invoice not found" });
-
-    const invoice = doc.data();
-    if (req.user.role !== "superadmin" && invoice.createdBy !== req.user.uid) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    res.status(200).json(invoice);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching invoice", error: error.message });
-  }
-};
-
-//  Update
-const updateInvoice = async (req, res) => {
-  try {
-    const ref = db.collection("invoices").doc(req.params.id);
-    const doc = await ref.get();
-
-    if (!doc.exists) return res.status(404).json({ message: "Invoice not found" });
-
-    const data = doc.data();
-    if (req.user.role !== "superadmin" && data.createdBy !== req.user.uid) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    // Save old record
-    await db.collection("invoices_history").add({
-      ...data,
-      updatedAt: new Date(),
-      updatedBy: req.user.uid,
-    });
-
-    // Update invoice
-    await ref.update({ ...req.body, updatedAt: new Date(), updatedBy: req.user.uid });
-    res.status(200).json({ message: "Invoice updated" });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating invoice", error: error.message });
-  }
-};
-
-//  Delete
-const deleteInvoice = async (req, res) => {
-  try {
-    const ref = db.collection("invoices").doc(req.params.id);
-    const doc = await ref.get();
-
-    if (!doc.exists) return res.status(404).json({ message: "Invoice not found" });
-
-    const data = doc.data();
-    if (req.user.role !== "superadmin" && data.createdBy !== req.user.uid) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    await ref.delete();
-    res.status(200).json({ message: "Invoice deleted" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting invoice", error: error.message });
-  }
-};
-
-module.exports = {
-  createInvoice,
-  getInvoices,
-  getInvoiceById,
-  updateInvoice,
-  deleteInvoice,
-};
+module.exports = {createInvoice};
