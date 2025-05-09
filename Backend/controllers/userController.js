@@ -20,7 +20,7 @@ const Register = async (req, res, next) => {
     const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
 
     //  Check Firestore for existing user by email
-    const userDocSnap = await db.collection("Addusers").where("email", "==", email).limit(1).get();
+    const userDocSnap = await db.collection("Adduser").where("email", "==", email).limit(1).get();
 
     //  Allow super_admin even if not in Firestore
     if (userDocSnap.empty && role !== "super_admin") {
@@ -39,7 +39,8 @@ const Register = async (req, res, next) => {
           message: role ==='super_admin'?'your superadmin account already created please login': "you already have account" });
       }
 
-      if (userData.role !== "admin" && role !== "super_admin") {
+      if (userData.role !== "Admin" && role !== "super_admin") {
+        console.log(userData.role);
         return res.status(403).json({ message: "Unauthorized role" });
       }
     }
@@ -59,9 +60,10 @@ const Register = async (req, res, next) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    await db.collection("Addusers").doc(email).update({
-      state : 'Acept'
-    });
+    await db.collection("Addusers").doc(email).set({
+      state: 'Acept'
+    }, { merge: true });
+    
     
     console.log('Registered.')
     return res.status(201).json({
