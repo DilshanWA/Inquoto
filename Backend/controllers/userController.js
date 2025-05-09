@@ -20,7 +20,7 @@ const Register = async (req, res, next) => {
     const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
 
     //  Check Firestore for existing user by email
-    const userDocSnap = await db.collection("users").where("email", "==", email).limit(1).get();
+    const userDocSnap = await db.collection("Addusers").where("email", "==", email).limit(1).get();
 
     //  Allow super_admin even if not in Firestore
     if (userDocSnap.empty && role !== "super_admin") {
@@ -59,6 +59,11 @@ const Register = async (req, res, next) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    await db.collection("Addusers").doc(email).update({
+      state : 'Acept'
+    });
+    
+
     return res.status(201).json({
       message: "User created successfully",
       uid: userRecord.uid,
@@ -75,6 +80,8 @@ const Register = async (req, res, next) => {
     });
   }
 };
+
+
 
 
 
@@ -104,8 +111,9 @@ const Login = async (req, res, next) => {
     message: "Login successful",
     idToken: response.data.idToken,
     uid: response.data.localId,
+  
   });
-    
+  
   } catch (error) {
     return res.status(401).json({
       message: "Login failed",
