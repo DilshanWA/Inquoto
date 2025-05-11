@@ -32,7 +32,7 @@ export default function Signup() {
       const response = await axios.post('http://localhost:5000/api/super-admin/Register', formData);
       console.log('Success:', response.data);
       if (response.data.register_sate === true) {
-           router.push('/');
+          router.push('/');
         };
       
       

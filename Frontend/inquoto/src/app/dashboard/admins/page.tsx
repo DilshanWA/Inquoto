@@ -28,13 +28,6 @@ export default function AdminPage() {
           Add New User
         </button>
 
-        <button
-          className="mt-4 ml-4 px-4 py-2 bg-green-600 text-white rounded"
-          onClick={handleNavigate}
-        >
-          Create User
-        </button>
-
         {showModal && (
           <div>
             <UserForm handleCloseForm={closeModal} /> 
