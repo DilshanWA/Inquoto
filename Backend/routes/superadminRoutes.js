@@ -5,7 +5,7 @@ const { Login,Register, getProfile } = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-const { addAdminUser, RemoveAdmin } = require("../utils/superAdminFun");
+const { addAdminUser, RemoveAdmin ,getadminDetails} = require("../utils/superAdminFun");
 const {createInvoice} = require("../controllers/invoiceController");
 
 
@@ -21,8 +21,13 @@ router.post("/login", Login);
 
 // router.get("/profile", authMiddleware,roleMiddleware("super_admin"), getProfile);
 
-router.get("/super-dashboard", authMiddleware, roleMiddleware("super_admin"), (req, res) => {
-  res.status(200).json({ message: "Super Admin Area " });
+router.get("/super-dashboard", authMiddleware, roleMiddleware("super_admin"), async(req, res) => {
+  try {
+    const result = await getadminDetails();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 
@@ -43,12 +48,11 @@ router.post("/add-user", authMiddleware, roleMiddleware("super_admin"), async (r
 
 
 
-router.get("/delete-user", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
-
-  const { email } = req.body;
+router.delete("/delete-user/:id", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
+  
 
   try {
-    const result = await RemoveAdmin(email);
+    const result = await RemoveAdmin(req.params.id);
     res.status(200).json(result);
 
 
