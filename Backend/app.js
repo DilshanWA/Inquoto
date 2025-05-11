@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 
-const superAdminRoutes = require('./routes/superadminRoutes')
+const superAdminRoutes = require('./routes/userRoute')
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -13,6 +13,8 @@ app.use(express.json());
 
 //superadmin
 app.use("/api/super-admin", superAdminRoutes);
+
+
 
 //Admin
 
