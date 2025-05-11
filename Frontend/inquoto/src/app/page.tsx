@@ -41,15 +41,13 @@ export default function LoginPage() {
         email,
         password
       });
-  
-      //  You can also store a token or user data from response if needed
-      console.log("Login success:", response.data);
+
+      localStorage.setItem('uid', response.data.uid);
+      localStorage.setItem('name', response.data.name) // Store user data in local storage
       localStorage.setItem('role', response.data.role); // Store role in local storage
       localStorage.setItem('token', response.data.idToken); // Store token in local storage
-
-
-  
       router.push('/dashboard'); // Redirect on success
+
     } catch (err: any) {
       console.error("Login failed:", err);
   
@@ -63,7 +61,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-  
 
   return (
     <div className="h-screen flex items-center bg-green-100">
@@ -121,10 +118,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="relative h-screen w-1/2 bg-[url('/images/bg1.jpg')] bg-cover bg-center">
+      <div className="relative h-screen w-1/2 bg-[url('/images/bg13.jpg')] bg-cover bg-center">
         <div className="absolute inset-1"></div>
         <div className="relative z-10 text-white p-8" />
       </div>
-    </div>
+    </div> 
   );
 }

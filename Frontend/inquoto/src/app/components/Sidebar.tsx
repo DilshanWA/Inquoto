@@ -29,6 +29,7 @@ const Sidebar = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('uid');
     localStorage.removeItem('role');
+    localStorage.removeItem('name');
     router.push('/');
   };
 
