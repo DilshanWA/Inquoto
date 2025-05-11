@@ -4,6 +4,10 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
+
+
+const {createInvoice , getAllInvoices} = require('../utils/superAdminFun')
+const  {generatePDF} = require('../utils/pdfGenerator');
 //invoice details
 
 router.get("/getAll-invoices", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
@@ -23,27 +27,11 @@ router.get("/getAll-invoices", authMiddleware, roleMiddleware("super_admin"), as
 
 router.post("/Create-invoices", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
  
+  console.log("Invoice received:", req.body);
 
-  const  {customerName,customerAddress,
-    date,
-    validity,
-    items,
-    note,
-    terms,
-    total} = req.body;
-  const uid = req.uid;
-  
-  const invoiceData ={customerName,
-    customerAddress,
-    date,
-    validity,
-    items,
-    note,
-    terms,
-    total,uid}
-  console.log('invoice ',customerName);
+
   try {
-    const result = await createInvoice(invoiceData,uid);
+    const result = await createInvoice(req.body);
     res.status(200).json(result);
 
 
@@ -84,10 +72,12 @@ router.put("/update-invoices:id", authMiddleware, roleMiddleware("super_admin"),
 
 router.post("/Create-invoice-pdf",authMiddleware,roleMiddleware("super_admin"),async (req, res) => {
   try {
+    console.log(req.body)
     const pdfBuffer = await generatePDF(req.body); 
     const base64PDF = pdfBuffer.toString("base64");
     res.status(200).json({ pdf: base64PDF, fileName: `invoice_${Date.now()}.pdf` });
   } catch (error) {
+    console.error('PDF Generation Error:', error);
     res.status(500).json({ message: error.message });
   }
 }

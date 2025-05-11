@@ -23,7 +23,7 @@ async function generatePDF(data) {
   }
 
   // === 2. Invoice Title ===
-  drawText(`Invoice ${data.invoiceNo || "000000"}`, 450, y, 14);
+  drawText(`Invoice ${data.invoiceId || "000000"}`, 450, y, 14);
   y -= 30;
   drawText(`Tax Invoice`, 450, y, 10);
 
@@ -31,9 +31,9 @@ async function generatePDF(data) {
   y -= 60;
   drawText("BILL TO", 50, y, 10);
   y -= 15;
-  drawText(data.clientName || "Client Name", 50, y);
+  drawText(data.customerName || "Client Name", 50, y);
   y -= 15;
-  drawText(data.address || "Client Address", 50, y);
+  drawText(data.customerAddress || "Client Address", 50, y);
 
   // === 4. Invoice Metadata Box ===
   const orange = rgb(1, 0.6, 0);
@@ -44,9 +44,9 @@ async function generatePDF(data) {
   const boxWidth = 120;
 
   const metaData = [
-    { title: "Invoice No.", value: data.invoiceNo || "000000" },
-    { title: "Issue date", value: data.issueDate || "N/A" },
-    { title: "Due date", value: data.dueDate || "N/A" },
+    { title: "Invoice No.", value: data.invoiceId || "000000" },
+    { title: "Issue date", value: data.date || "N/A" },
+    { title: "Due date", value: data.validity || "N/A" },
     { title: "Total due (LKR)", value: `Rs ${data.total?.toFixed(2) || "0.00"}`, dark: true },
   ];
 
@@ -70,31 +70,22 @@ async function generatePDF(data) {
   // === 6. Items ===
   data.items?.forEach(item => {
     drawText(item.description, tableStartX, tableY);
-    drawText(item.qty.toString(), tableStartX + 250, tableY);
+    drawText(item.quantity.toString(), tableStartX + 250, tableY);
     drawText(`Rs ${item.unitPrice.toFixed(2)}`, tableStartX + 350, tableY);
-    drawText(`Rs ${(item.qty * item.unitPrice).toFixed(2)}`, tableStartX + 450, tableY);
+    drawText(`Rs ${(item.quantity * item.unitPrice).toFixed(2)}`, tableStartX + 450, tableY);
     tableY -= 15;
   });
 
   // === 7. Totals ===
   tableY -= 20;
-  drawText(`Subtotal: Rs ${data.subtotal?.toFixed(2) || "0.00"}`, tableStartX + 350, tableY);
+  drawText(`Subtotal: Rs ${data.total?.toFixed(2) || "0.00"}`, tableStartX + 350, tableY);
   tableY -= 15;
-  drawText(`Tax: Rs ${data.tax?.toFixed(2) || "0.00"}`, tableStartX + 350, tableY);
+  drawText(`Note: ${data.note || "N/A"}`, tableStartX + 350, tableY); // Add note here if needed
   tableY -= 15;
-  drawText(`Discount: Rs ${data.discount?.toFixed(2) || "0.00"}`, tableStartX + 350, tableY);
+  drawText(`Terms: ${data.terms || "N/A"}`, tableStartX + 350, tableY); // Add terms here if needed
   tableY -= 15;
-  drawText(`Total: Rs ${data.total?.toFixed(2) || "0.00"}`, tableStartX + 350, tableY, 12, rgb(0, 0, 0));
 
-  // === 8. Signature ===
-  if (fs.existsSync(path.join(__dirname, "../assets/signature.png"))) {
-    const signImg = fs.readFileSync(path.join(__dirname, "../assets/signature.png"));
-    const signature = await pdfDoc.embedPng(signImg);
-    page.drawImage(signature, { x: 400, y: 100, width: 120, height: 50 });
-  }
-  drawText("Issued by, signature:", 400, 160);
-
-  // === 9. Footer ===
+  // === 8. Footer ===
   drawText("Your Business Name", 50, 40, 10);
   drawText("5 Martin Pl, Sydney NSW", 50, 30, 10);
   drawText("+61 2000 0000", 250, 30, 10);

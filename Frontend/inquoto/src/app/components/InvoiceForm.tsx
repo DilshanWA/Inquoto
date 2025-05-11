@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 interface LineItem {
   description: string;
@@ -14,60 +14,75 @@ interface InvoiceFormProps {
 }
 
 export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
-  const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const [date, setDate] = useState('');
-  const [validity, setValidity] = useState('');
-  const [items, setItems] = useState<LineItem[]>([
-    { description: '', quantity: 0, unitPrice: 0, total: 0 },
-  ]);
-  const [note, setNote] = useState('');
-  const [terms, setTerms] = useState('');
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerAddress: '',
+    date: '',
+    validity: '',
+    items: [{ description: '', quantity: 0, unitPrice: 0, total: 0 }],
+    note: '',
+    terms: '',
+  });
 
+  // Handle change for general form fields
+  const handleChange = useCallback(
+    (field: keyof typeof formData, value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  // Handle change for individual line item fields
+  const handleChangeItem = useCallback(
+    (index: number, field: keyof LineItem, value: string) => {
+      setFormData((prev) => {
+        const updatedItems = [...prev.items];
+        if (field === 'description') updatedItems[index].description = value;
+        else if (field === 'quantity') updatedItems[index].quantity = Number(value);
+        else if (field === 'unitPrice') updatedItems[index].unitPrice = Number(value);
+        updatedItems[index].total = updatedItems[index].quantity * updatedItems[index].unitPrice;
+        return { ...prev, items: updatedItems };
+      });
+    },
+    []
+  );
+
+  // Add a new item row
   const handleAddItem = () => {
-    setItems([...items, { description: '', quantity: 0, unitPrice: 0, total: 0 }]);
+    setFormData((prev) => ({
+      ...prev,
+      items: [...prev.items, { description: '', quantity: 0, unitPrice: 0, total: 0 }],
+    }));
   };
 
+  // Remove a specific item row
   const handleRemoveItem = (index: number) => {
-    const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
+    setFormData((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
   };
 
-  const handleChangeItem = (index: number, field: keyof LineItem, value: string) => {
-    const updatedItems = [...items];
-    if (field === 'description') {
-      updatedItems[index].description = value;
-    } else if (field === 'quantity') {
-      updatedItems[index].quantity = Number(value);
-    } else if (field === 'unitPrice') {
-      updatedItems[index].unitPrice = Number(value);
-    }
-    updatedItems[index].total = updatedItems[index].quantity * updatedItems[index].unitPrice;
-    setItems(updatedItems);
-  };
+  // Get total invoice amount
+  const getTotalInvoice = () => formData.items.reduce((total, item) => total + item.total, 0);
 
-  const getTotalInvoice = () => {
-    return items.reduce((total, item) => total + item.total, 0);
-  };
-
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const invoiceData = {
-      customerName,
-      customerAddress,
-      date,
-      validity,
-      items,
-      note,
-      terms,
+      ...formData,
       total: getTotalInvoice(),
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/invoice', {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/invoice/Create-invoices', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(invoiceData),
       });
 
@@ -85,8 +100,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
 
   return (
     <>
-     <div className="fixed  h-screen inset-0 bg-black opacity-70 transition-opacity" />
-      <div className="flex  items-center justify-center p-4 text-center -mt-30">
+      <div className="fixed h-screen inset-0 bg-black opacity-70 transition-opacity" />
+      <div className="flex items-center justify-center p-4 text-center -mt-30">
         <div className="relative w-full max-w-7xl transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all">
           <button
             onClick={handleCloseForm}
@@ -105,8 +120,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 <label className="block text-black font-medium">Customer Name</label>
                 <input
                   type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  value={formData.customerName}
+                  onChange={(e) => handleChange('customerName', e.target.value)}
                   className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
                   placeholder="Customer name"
                 />
@@ -115,8 +130,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 <label className="block text-black font-medium">Date</label>
                 <input
                   type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  value={formData.date}
+                  onChange={(e) => handleChange('date', e.target.value)}
                   className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
                 />
               </div>
@@ -124,8 +139,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 <label className="block text-black font-medium">Customer Address</label>
                 <input
                   type="text"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  value={formData.customerAddress}
+                  onChange={(e) => handleChange('customerAddress', e.target.value)}
                   className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
                   placeholder="Customer address"
                 />
@@ -134,8 +149,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 <label className="block font-medium">Validity</label>
                 <input
                   type="date"
-                  value={validity}
-                  onChange={(e) => setValidity(e.target.value)}
+                  value={formData.validity}
+                  onChange={(e) => handleChange('validity', e.target.value)}
                   className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
                 />
               </div>
@@ -152,11 +167,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
             </div>
 
             {/* Line Items */}
-            {items.map((item, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 sm:grid-cols-12 gap-2 py-1 px-2 items-center text-sm"
-              >
+            {formData.items.map((item, index) => (
+              <div key={index} className="grid grid-cols-1 sm:grid-cols-12 gap-2 py-1 px-2 items-center text-sm">
                 <div className="col-span-1 text-center">{index + 1}</div>
                 <input
                   type="text"
@@ -186,7 +198,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(index)}
-                    className="text-red-500 hover:text-red-700 hover:text-red cursor-pointer"
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
                     title="Delete row"
                   >
                     🗑️
@@ -217,8 +229,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
               <textarea
                 className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
                 rows={3}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
+                value={formData.note}
+                onChange={(e) => handleChange('note', e.target.value)}
                 placeholder="Add any special notes here..."
               />
             </div>
@@ -229,8 +241,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
               <textarea
                 className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3"
                 rows={3}
-                value={terms}
-                onChange={(e) => setTerms(e.target.value)}
+                value={formData.terms}
+                onChange={(e) => handleChange('terms', e.target.value)}
                 placeholder="Write your terms & conditions..."
               />
             </div>

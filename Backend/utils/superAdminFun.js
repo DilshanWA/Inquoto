@@ -51,7 +51,7 @@ async function getadminDetails() {
 async function addAdminUser(email) {
   if (!email) throw new Error("Email is required");
    try{
-    db.collection('Adduser').doc(email).set({
+    db.collection('Addusers').doc(email).set({
       name:'admin',
       email:email,
       role:'Admin',
@@ -134,7 +134,7 @@ async function RemoveAdmin(email) {
     }
 
     // 3. Delete from 'adduser' collection
-    await db.collection("Adduser").doc(email).delete();
+    await db.collection("Addusers").doc(email).delete();
 
     // 4. Send notification email
     await transporter.sendMail({
@@ -163,44 +163,47 @@ async function RemoveAdmin(email) {
 //Create invoice
 
 async function createInvoice(invoiceData) {
-  if (!invoiceData || !invoiceData.customerName || !invoiceData.amount) {
-    throw new Error("Invoice data is required: customerName and amount are mandatory");
+  if (!invoiceData || !invoiceData.customerName || !invoiceData.total) {
+    throw new Error("Invoice data is required: customerName and total are mandatory");
   }
 
   try {
-    // 1. Generate a unique invoice ID using the current date and time (format: YYYYMMDDHHMM)
+    // 1. Generate unique invoice ID: YYYYMMDDHHMM
     const now = new Date();
     const invoiceId = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
-    // 2. Add a new invoice document to the "invoices" collection with the generated invoice ID
-    const newInvoiceRef = await db.collection("invoices").doc(invoiceId).set({
-      ...invoiceData, // Spread the invoice data from the request
-      createdAt: new Date(), // Timestamp when the invoice is created
-      status: "pending", // Default status
-    });
+    // 2. Create the full invoice object with all expected fields
+    const fullInvoice = {
+      invoiceId,
+      createdAt: now,
+      customerName: invoiceData.customerName,
+      customerAddress: invoiceData.customerAddress || '',
+      date: invoiceData.date || '',
+      validity: invoiceData.validity || '',
+      items: invoiceData.items || [],
+      note: invoiceData.note || '',
+      terms: invoiceData.terms || '',
+      total: invoiceData.total,
+      status: invoiceData.status || 'pending',
+      userID: invoiceData.uid || null
+    };
 
-    db.collection('invoices').doc(invoiceId).set({
-        invoiceId: invoiceId,
-        satatus : invoiceData.status,
-        userID : invoiceData.uid
-    })
+    // 3. Save to Firestore
+    await db.collection("invoices").doc(invoiceId).set(fullInvoice);
 
-    // 3. Return the new invoice's document ID and data
+    // 4. Return response
     return {
       success: true,
       message: "Invoice created successfully",
-      invoice: {
-        id: invoiceId, // Use the custom invoice ID
-        ...invoiceData,
-        createdAt: new Date(), // Add createdAt timestamp
-        status: "pending", // Default status
-      },
+      invoice: fullInvoice,
     };
   } catch (error) {
     console.error("Error creating invoice:", error);
     throw new Error("Failed to create invoice");
   }
 }
+
+
 
 
 //invoice function
