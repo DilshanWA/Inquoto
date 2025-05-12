@@ -8,7 +8,7 @@ require('dotenv').config();
 
 //Register user
 
-const Register = async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   if (!email || !password || !name) {
@@ -84,12 +84,9 @@ const Register = async (req, res, next) => {
 };
 
 
-
-
-
 //Login
 
-const Login = async (req, res, next) => {
+const loginUser = async (req, res, next) => {
    
 
   const { email, password } = req.body;
@@ -128,4 +125,4 @@ const Login = async (req, res, next) => {
 
 }
 
-module.exports = { Login ,Register}
+module.exports = { loginUser ,registerUser}
