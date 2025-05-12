@@ -11,9 +11,10 @@ interface LineItem {
 
 interface InvoiceFormProps {
   handleCloseForm: () => void;
+  type: 'invoice' | 'quotation'; // <-- NEW PROP to differentiate
 }
 
-export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
+export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps) {
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [date, setDate] = useState('');
@@ -53,7 +54,8 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const invoiceData = {
+    const formData = {
+      type, // <-- include type (invoice or quotation)
       customerName,
       customerAddress,
       date,
@@ -64,29 +66,34 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
       total: getTotalInvoice(),
     };
 
+    const endpoint =
+      type === 'invoice'
+        ? 'http://localhost:5000/api/super-admin/Create-invoices'
+        : 'http://localhost:5000/api/quotation';
+
     try {
-      const response = await fetch('http://localhost:5000/api/invoice', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(invoiceData),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Invoice submitted:', result);
+        console.log(`${type} submitted:`, result);
         handleCloseForm();
       } else {
-        console.error('Failed to submit invoice');
+        console.error(`Failed to submit ${type}`);
       }
     } catch (error) {
-      console.error('Error submitting invoice:', error);
+      console.error(`Error submitting ${type}:`, error);
     }
   };
 
   return (
     <>
-     <div className="fixed  h-screen inset-0 bg-black opacity-70 transition-opacity" />
-      <div className="flex  items-center justify-center p-4 text-center -mt-30">
+      <div className="fixed h-screen inset-0 bg-black opacity-70 transition-opacity" />
+      <div className="flex items-center justify-center p-4 text-center -mt-30">
         <div className="relative w-full max-w-7xl transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all">
           <button
             onClick={handleCloseForm}
@@ -99,6 +106,10 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
           </button>
 
           <form className="space-y-6 p-6" onSubmit={handleSubmit}>
+            <h2 className="text-xl font-bold text-black capitalize">
+              {type === 'invoice' ? 'Create Invoice' : 'Create Quotation'}
+            </h2>
+
             {/* Customer Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -153,10 +164,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
 
             {/* Line Items */}
             {items.map((item, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 sm:grid-cols-12 gap-2 py-1 px-2 items-center text-sm"
-              >
+              <div key={index} className="grid grid-cols-1 sm:grid-cols-12 gap-2 py-1 px-2 items-center text-sm">
                 <div className="col-span-1 text-center">{index + 1}</div>
                 <input
                   type="text"
@@ -179,14 +187,12 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                   className="col-span-2 border border-gray-300 rounded-md py-3 px-2 text-center"
                   placeholder="Price"
                 />
-                <div className="col-span-1 text-center text-black">
-                  Rs{item.total.toFixed(2)}
-                </div>
+                <div className="col-span-1 text-center text-black">Rs{item.total.toFixed(2)}</div>
                 <div className="col-span-1 text-center">
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(index)}
-                    className="text-red-500 hover:text-red-700 hover:text-red cursor-pointer"
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
                     title="Delete row"
                   >
                     🗑️
@@ -241,7 +247,7 @@ export default function InvoiceForm({ handleCloseForm }: InvoiceFormProps) {
                 type="submit"
                 className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700"
               >
-                Generate Invoice
+                Generate {type === 'invoice' ? 'Invoice' : 'Quotation'}
               </button>
             </div>
           </form>

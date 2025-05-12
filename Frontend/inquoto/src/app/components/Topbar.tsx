@@ -1,6 +1,9 @@
+import React from "react";
+import ProfileDropdown from "../profile/page";
+
 export default function Topbar() {
     return (
-      <div className="flex justify-between items-center px-6 py-4 bg-white shadow">
+      <div className="flex justify-between items-center px-11 py-4 bg-white shadow">
         <input
           type="text"
           placeholder="Search anything"
@@ -11,11 +14,7 @@ export default function Topbar() {
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">2</span>
             🔔
           </div>
-          <img
-            src="/profile.jpg"
-            className="w-8 h-8 rounded-full"
-            alt="User Avatar"
-          />
+          <ProfileDropdown />
         </div>
       </div>
     );

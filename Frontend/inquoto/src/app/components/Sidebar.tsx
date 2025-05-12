@@ -18,26 +18,21 @@ const Sidebar = () => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem('role'); // or use role
-    // Check email (hardcoded)
+    const role = localStorage.getItem('role');
     if (role === 'super_admin') {
       setIsSuperAdmin(true);
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('uid');
-    localStorage.removeItem('role');
-    localStorage.removeItem('name');
-    router.push('/');
-  };
-
   return (
-    <div className="bg-[#050A30] text-white h-screen w-64 flex flex-col justify-between">
+    <div className="bg-black text-white h-screen w-70 flex flex-col justify-between">
+      {/* Top: Logo and Nav */}
       <div>
-        <h1 className="text-4xl font-bold p-4">Inquoto</h1>
-        <nav className="mt-8">
+        <div className="flex flex-col items-center px-4 mt-10">
+          <img src="/images/systemLogo.png" alt="Logo" className="w-40 h-auto" />
+        </div>
+
+        <nav className="mt-10">
           <ul className="space-y-4 px-4 text-xl">
             {navItems.map(({ name, href }) => (
               <li key={href}>
@@ -45,8 +40,8 @@ const Sidebar = () => {
                   href={href}
                   className={`block px-3 py-2 rounded ${
                     pathname === href
-                      ? 'bg-blue-100 text-black'
-                      : 'hover:bg-blue-100 hover:text-black'
+                      ? 'bg-teal-600 text-black'
+                      : 'hover:bg-teal-500 hover:text-black'
                   }`}
                 >
                   {name}
@@ -59,8 +54,8 @@ const Sidebar = () => {
                   href={adminNavItem.href}
                   className={`block px-3 py-2 rounded ${
                     pathname === adminNavItem.href
-                      ? 'bg-blue-100 text-black'
-                      : 'hover:bg-blue-100 hover:text-black'
+                      ? 'bg-teal-600 text-black'
+                      : 'hover:bg-teal-500 hover:text-black'
                   }`}
                 >
                   {adminNavItem.name}
@@ -70,13 +65,9 @@ const Sidebar = () => {
           </ul>
         </nav>
       </div>
-      <div className="px-4 mb-4">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center bg-gray-700 rounded px-3 py-2 hover:bg-gray-600"
-        >
-          <span className="mr-2">🔒</span> Logout
-        </button>
+
+      {/* Bottom: Footer */}
+      <div className="px-4 mb-4 text-center">
         <p className="text-xs mt-2">Powered by NeoMac Engineering</p>
       </div>
     </div>

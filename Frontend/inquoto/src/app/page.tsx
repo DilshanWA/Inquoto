@@ -45,7 +45,8 @@ export default function LoginPage() {
       localStorage.setItem('uid', response.data.uid);
       localStorage.setItem('name', response.data.name) // Store user data in local storage
       localStorage.setItem('role', response.data.role); // Store role in local storage
-      localStorage.setItem('token', response.data.idToken); // Store token in local storage
+      localStorage.setItem('token', response.data.idToken); 
+      localStorage.setItem('email', email); // Store email in local storag
       router.push('/dashboard'); // Redirect on success
 
     } catch (err: any) {
@@ -67,7 +68,7 @@ export default function LoginPage() {
       <div className="h-screen w-1/2 bg-white">
         <div className="flex flex-col items-center justify-center h-full">
           <div className="justify-center text-left mb-10 w-1/2">
-            <h1 className="text-4xl font-bold text-gray-800">Welcome to NecMac System</h1>
+            <h1 className="text-4xl font-bold text-gray-800">Welcome to QuantifyPro</h1>
             <p className="text-black mt-2">Please enter your login credentials.</p>
           </div>
 

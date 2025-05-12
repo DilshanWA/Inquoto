@@ -9,6 +9,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
+
+      
     <div className="flex h-screen">
       {/* Sidebar (fixed on the left) */}
       <div className="w-64 fixed top-0 left-0 bottom-0 bg-white shadow-md z-40">
