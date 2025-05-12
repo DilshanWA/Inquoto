@@ -4,9 +4,11 @@ import { useState } from 'react';
 
 interface UserFormProps {
   handleCloseForm: () => void;
+  refreshTable: () => void;
 }
 
-export default function UserForm({ handleCloseForm }: UserFormProps) {
+export default function UserForm({ handleCloseForm, refreshTable }: UserFormProps)
+ {
   const [email, setEmail] = useState('');
   const [addsuccess, setAddSuccess] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/super-admin/add-user', {
+      const response = await fetch('http://localhost:5000/api/vi/add-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,6 +48,7 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
   const handlePopupClose = () => {
     setAddSuccess(null);  // Close the popup
     handleCloseForm(); // Close the form as well
+    refreshTable();
   };
 
   return (
@@ -116,7 +119,7 @@ export default function UserForm({ handleCloseForm }: UserFormProps) {
             <div className="text-center">
               <h2
                 className={`text-xl font-semibold ${
-                  addsuccess ? 'text-green-600' : 'text-red-600'
+                  addsuccess ? 'text-teal-600' : 'text-red-600'
                 }`}
               >
                 {addsuccess ? 'User Added Successfully!' : 'Failed to Add User'}

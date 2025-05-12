@@ -7,12 +7,14 @@ import UserTable from '@/app/components/usersTable';
 
 export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter(); // ✅ Call useRouter at the top
 
   const closeModal = () => setShowModal(false);
 
-  const handleNavigate = () => {
-    router.push('/Create_user'); // ✅ Navigate using a string route
+
+  const handleRefreshTable = () => {
+    setRefreshKey(prev => prev + 1); // Triggers table reload
   };
 
   return (
@@ -30,11 +32,11 @@ export default function AdminPage() {
 
         {showModal && (
           <div>
-            <UserForm handleCloseForm={closeModal} /> 
+            <UserForm handleCloseForm={closeModal} refreshTable={handleRefreshTable} /> 
           </div>
         )}
 
-        <UserTable/>
+        <UserTable refreshKey={refreshKey}/>
 
 
       </div>
