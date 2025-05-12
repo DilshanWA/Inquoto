@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
+
+interface TableProps {
+  refreshKey: number;
+}
+
+
 interface User {
   id: string;
   name: string;
@@ -11,35 +17,36 @@ interface User {
   date: string;
 }
 
-export default function UserTable() {
+export default function UserTable({ refreshKey }: TableProps)  {
   const [users, setUsers] = useState<User[]>([]);
 
-  useEffect(() => {
-  fetchUsers(); 
- }, []);
-;
+
 
 const [loading, setLoading] = useState(false);
 
-const fetchUsers = async () => {
-  setLoading(true);
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:5000/api/super-admin/super-dashboard', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    console.log('Fetched users:', data);
-    setUsers(data.data);
-  } catch (error) {
-    console.error('Failed to fetch users:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+useEffect(() => {
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/vi/dashboard', {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setUsers(data.data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchUsers();
+}, [refreshKey]);
+
 
   
 
@@ -49,7 +56,7 @@ const fetchUsers = async () => {
       const confirmed = window.confirm("Are you sure you want to delete this user?");
       if (!confirmed) return;
 
-      const res = await fetch(`http://localhost:5000/api/super-admin/delete-user/${id}`, {
+      const res = await fetch(`http://localhost:5000/api/vi/delete-user/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

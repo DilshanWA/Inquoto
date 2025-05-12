@@ -56,7 +56,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/super-admin/Register', formData);
+      const response = await axios.post('http://localhost:5000/api/vi/register', formData);
       console.log('Success:', response.data);
 
       if (response.data.register_sate === true) {

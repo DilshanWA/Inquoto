@@ -24,6 +24,8 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
   ]);
   const [note, setNote] = useState('');
   const [terms, setTerms] = useState('');
+  const token = localStorage.getItem('token');
+
 
   const handleAddItem = () => {
     setItems([...items, { description: '', quantity: 0, unitPrice: 0, total: 0 }]);
@@ -51,44 +53,62 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
     return items.reduce((total, item) => total + item.total, 0);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const formData = {
-      type, // <-- include type (invoice or quotation)
-      customerName,
-      customerAddress,
-      date,
-      validity,
-      items,
-      note,
-      terms,
-      total: getTotalInvoice(),
-    };
+  // Retrieve uid and name from localStorage
+  const uid = localStorage.getItem('uid');
+  const userName = localStorage.getItem('name');
 
-    const endpoint =
-      type === 'invoice'
-        ? 'http://localhost:5000/api/super-admin/Create-invoices'
-        : 'http://localhost:5000/api/quotation';
+  // Ensure uid and name are available, else show an error
+  if (!uid || !userName) {
+    console.error('User UID or name is missing in localStorage');
+    return;
+  }
 
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log(`${type} submitted:`, result);
-        handleCloseForm();
-      } else {
-        console.error(`Failed to submit ${type}`);
-      }
-    } catch (error) {
-      console.error(`Error submitting ${type}:`, error);
-    }
+  // Create formData including uid and name
+  const formData = {
+    type, // <-- include type (invoice or quotation)
+    customerName,
+    customerAddress,
+    date,
+    validity,
+    items,
+    note,
+    terms,
+    total: getTotalInvoice(),
+    uid,  // Include uid
+    userName, // Include name
   };
+
+  // Define the endpoint based on type
+  const endpoint =
+    type === 'invoice'
+      ? 'http://localhost:5000/api/vi/create-invoices'
+      : 'http://localhost:5000/api/quotation';
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Assuming token is already set
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`${type} submitted:`, result);
+      handleCloseForm();
+    } else {
+      console.error(`Failed to submit ${type}`);
+    }
+  } catch (error) {
+    console.error(`Error submitting ${type}:`, error);
+  }
+};
+
 
   return (
     <>
