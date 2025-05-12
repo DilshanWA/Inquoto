@@ -18,7 +18,7 @@ const login = async (req, res) => {
     const token = await loginUser(req.body);
     res.status(200).json(token);
   } catch (error) {
-    res.status(401).json({ message: error.message });
+    res.status(401).json({ message:error.message });
   }
 };
 
@@ -40,6 +40,7 @@ const getProfile = async (req, res) => {
 
 const getAdminDashboard = async (req, res) => {
   try {
+    
     const data = await getadminDetails();
     res.status(200).json(data);
   } catch (error) {

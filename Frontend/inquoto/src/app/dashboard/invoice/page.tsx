@@ -31,7 +31,7 @@ export default function InvoicePage() {
         )}
 
         {/* Invoice form appears only when isFormVisible is true */}
-        {isFormVisible && <InvoiceForm handleCloseForm={handleCloseForm}  />}
+        {isFormVisible && <InvoiceForm type='invoice' handleCloseForm={handleCloseForm}  />}
     </div>  
   );
 }

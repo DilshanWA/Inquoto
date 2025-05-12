@@ -14,15 +14,17 @@ const invoiceController = require("../routes/route/invoiceRoutes");
 router.post("/register", userController.register);
 router.post("/login", userController.login);
 
+// Optional: protected profile route
+router.get("/profile", authMiddleware, userController.getProfile);
+
 //  Get super admin dashboard info
-router.get("/dashboard",authMiddleware,userController.getAdminDashboard);
+router.get("/admin-details",authMiddleware,userController.getAdminDashboard);
 
 //  Add a new admin user
 router.post( "/add-user",authMiddleware,roleMiddleware("super_admin"),userController.addAdmin);
 //  Delete an admin user
 router.delete("/delete-user/:id",authMiddleware,roleMiddleware("super_admin"),userController.removeAdmin);
-// Optional: protected profile route
-// router.get("/profile", authMiddleware, userController.getProfile);
+
 
 
 //  GET all quotations
@@ -43,6 +45,8 @@ router.post("/create-invoices",authMiddleware,invoiceController.create);
 router.delete("/delete-invoices/:id",authMiddleware,invoiceController.remove);
 //  Update an invoice
 router.put("/update-invoices/:id",authMiddleware,invoiceController.update);
+
+
 //  Generate invoice PDF
 router.post("/create-invoice-pdf",authMiddleware,invoiceController.generatePDF);
 

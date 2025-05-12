@@ -61,7 +61,9 @@ const registerUser = async (req, res, next) => {
     });
 
     await db.collection("Addusers").doc(email).set({
-      state: 'Acept'
+      state: 'Acept',
+      name :name,
+      reg_date :new Date().toISOString('en-GB')
     }, { merge: true });
     
     
@@ -71,6 +73,7 @@ const registerUser = async (req, res, next) => {
       uid: userRecord.uid,
       role,
       register_sate: true,
+      name:name
     });
 
   } catch (error) {
@@ -88,8 +91,6 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
    
-
-  const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
   }

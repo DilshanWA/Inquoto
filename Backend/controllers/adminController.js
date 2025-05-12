@@ -5,6 +5,8 @@ require('dotenv').config();
 
 
 const LOGIN_REDIRECT_URL = "https://your-app.com/admin-login";
+//  Determine role
+
 
 
 const transporter = nodemailer.createTransport({
@@ -19,6 +21,42 @@ const transporter = nodemailer.createTransport({
  * Add user with admin role and send magic login link
  * @param {string} email 
  */
+
+
+
+
+//Get profile data
+
+async function getUserProfile(email) {
+  try {
+    const userRef = db.collection('users').doc(email);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      throw new Error('User not found');
+    }
+
+    const userData = userDoc.data();
+
+    return {
+      success: true,
+      profile: {
+        email: userData.email,
+        name: userData.name,
+        register_state: userData.register_state,
+        role: userData.role,
+        createdAt: userData.createdAt, 
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return {
+      success: false,
+      message: 'Failed to fetch user profile',
+    };
+  }
+}
+
 
 
 
@@ -57,7 +95,6 @@ async function addAdminUser(email) {
       email:email,
       role:'Admin',
       state: 'pending',
-      date:new Date()
     })
 
     // 4. Send login link via email
@@ -154,6 +191,7 @@ async function RemoveAdmin(email) {
 
 
 module.exports = {
+
   addAdminUser , RemoveAdmin,
-  getadminDetails
+  getadminDetails ,getUserProfile
 };
