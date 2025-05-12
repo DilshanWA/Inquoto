@@ -34,7 +34,7 @@ router.post("/create-quotations",authMiddleware,quotationController.create);
 //  Delete a quotation
 router.delete("/delete-quotations/:id",authMiddleware,quotationController.remove);
 //  Update a quotation
-router.put("/update-quotations/:id",authMiddleware,quotationController.update);
+router.put("/update-quotations",authMiddleware,quotationController.update);
 
 
 //  GET all invoices

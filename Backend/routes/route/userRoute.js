@@ -14,7 +14,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  try {
+  try {  
     const token = await loginUser(req.body);
     res.status(200).json(token);
   } catch (error) {
@@ -28,6 +28,7 @@ const login = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
+    console.log(req.uid);
     const profile = await getUserProfile(req.uid); 
     res.status(200).json(profile);
   } catch (error) {

@@ -27,9 +27,9 @@ const transporter = nodemailer.createTransport({
 
 //Get profile data
 
-async function getUserProfile(email) {
+async function getUserProfile(data) {
   try {
-    const userRef = db.collection('users').doc(email);
+    const userRef = db.collection('users').doc(data);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {

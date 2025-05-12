@@ -2,15 +2,11 @@
 
 
 
-
-
-
-
 //Create invoice
 
 async function createInvoice(invoiceData) {
-  if (!invoiceData || !invoiceData.customerName || !invoiceData.total) {
-    throw new Error("Invoice data is required: customerName and total are mandatory");
+  if (!invoiceData) {
+    throw new Error("Invoice data is required");
   }
 
   try {
@@ -31,7 +27,8 @@ async function createInvoice(invoiceData) {
       terms: invoiceData.terms || '',
       total: invoiceData.total,
       status: invoiceData.status || 'pending',
-      userID: invoiceData.uid || null
+      userID: invoiceData.uid || null,
+      userName:userName ||null
     };
 
     // 3. Save to Firestore
