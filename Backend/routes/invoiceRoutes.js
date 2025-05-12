@@ -25,7 +25,7 @@ router.get("/getAll-invoices", authMiddleware, roleMiddleware("super_admin"), as
 
 
 
-router.post("/Create-invoices", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
+router.post("/Create-invoices", authMiddleware, async (req, res) => {
  
   console.log("Invoice received:", req.body);
 
@@ -54,7 +54,10 @@ router.delete("/delete-invoices:id", authMiddleware, roleMiddleware("super_admin
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-})
+});
+
+
+
 router.put("/update-invoices:id", authMiddleware, roleMiddleware("super_admin"), async (req, res) => {
 
   try {
@@ -70,18 +73,19 @@ router.put("/update-invoices:id", authMiddleware, roleMiddleware("super_admin"),
 
 
 
-router.post("/Create-invoice-pdf",authMiddleware,roleMiddleware("super_admin"),async (req, res) => {
-  try {
-    console.log(req.body)
-    const pdfBuffer = await generatePDF(req.body); 
-    const base64PDF = pdfBuffer.toString("base64");
-    res.status(200).json({ pdf: base64PDF, fileName: `invoice_${Date.now()}.pdf` });
-  } catch (error) {
-    console.error('PDF Generation Error:', error);
-    res.status(500).json({ message: error.message });
+router.post( "/Create-invoice-pdf",authMiddleware, async (req, res) => {
+    try {
+      const pdfBuffer = await generatePDF(req.body);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=invoice_${Date.now()}.pdf`);
+      res.send(pdfBuffer); // no base64 encoding here
+    } catch (error) {
+      console.error("PDF Generation Error:", error);
+      res.status(500).json({ message: error.message });
+    }
   }
-}
 );
+
 
 
 

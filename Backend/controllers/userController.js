@@ -20,7 +20,7 @@ const Register = async (req, res, next) => {
     const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
 
     //  Check Firestore for existing user by email
-    const userDocSnap = await db.collection("Adduser").where("email", "==", email).limit(1).get();
+    const userDocSnap = await db.collection("Addusers").where("email", "==", email).limit(1).get();
 
     //  Allow super_admin even if not in Firestore
     if (userDocSnap.empty && role !== "super_admin") {

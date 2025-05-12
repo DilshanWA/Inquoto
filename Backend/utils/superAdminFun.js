@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 async function getadminDetails() {
   try {
-    const snapshot = await db.collection("Adduser").get();
+    const snapshot = await db.collection("Addusers").get();
 
     const admins = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -103,7 +103,7 @@ async function RemoveAdmin(email) {
 
   try {
     // 1. Get the user's document from 'adduser'
-    const userDoc = await db.collection("Adduser").doc(email).get();
+    const userDoc = await db.collection("Addusers").doc(email).get();
 
     if (!userDoc.exists) {
       throw new Error("User not found in adduser collection");
