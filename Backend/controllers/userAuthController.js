@@ -8,7 +8,7 @@ require('dotenv').config();
 
 //Register user
 
-const Register = async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   if (!email || !password || !name) {
@@ -20,7 +20,7 @@ const Register = async (req, res, next) => {
     const role = email === process.env.SUPERADMIN ? "super_admin" : "admin";
 
     //  Check Firestore for existing user by email
-    const userDocSnap = await db.collection("Adduser").where("email", "==", email).limit(1).get();
+    const userDocSnap = await db.collection("Addusers").where("email", "==", email).limit(1).get();
 
     //  Allow super_admin even if not in Firestore
     if (userDocSnap.empty && role !== "super_admin") {
@@ -84,12 +84,9 @@ const Register = async (req, res, next) => {
 };
 
 
-
-
-
 //Login
 
-const Login = async (req, res, next) => {
+const loginUser = async (req, res, next) => {
    
 
   const { email, password } = req.body;
@@ -128,4 +125,4 @@ const Login = async (req, res, next) => {
 
 }
 
-module.exports = { Login ,Register}
+module.exports = { loginUser ,registerUser}
