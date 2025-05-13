@@ -45,7 +45,7 @@ const update = async (req, res) => {
   }
 };
 
-const generatePDFHandler = async (req, res) => {
+const  genPDF = async (req, res) => {
   try {
     const pdfBuffer = await generatePDF(req.body);
     res.setHeader("Content-Type", "application/pdf");
@@ -65,5 +65,5 @@ module.exports = {
   create,
   remove,
   update,
-  generatePDF: generatePDFHandler,
+  genPDF,
 };

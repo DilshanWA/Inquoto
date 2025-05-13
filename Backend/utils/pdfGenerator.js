@@ -92,17 +92,8 @@ async function generatePDF(data) {
   drawText("yourbusinessname.com.au", 350, 30, 10);
   drawText("email@yourbusinessname.com.au", 350, 20, 10);
 
-  // === Save the file ===
-  const fileName = `invoice_${Date.now()}.pdf`;
-  const filePath = path.join("generated_pdfs", fileName);
-
-  if (!fs.existsSync("generated_pdfs")) {
-    fs.mkdirSync("generated_pdfs");
-  }
-
-  fs.writeFileSync(filePath, await pdfDoc.save());
-
-  return { fileName };
+  const pdfBytes = await pdfDoc.save();
+  return pdfBytes;
 }
 
 module.exports = { generatePDF };
