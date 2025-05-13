@@ -30,8 +30,8 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
       try {
         const url =
           type === 'quotation'
-            ? 'http://localhost:5000/api/quotations'
-            : 'http://localhost:5000/api/invoice/getAll-invoices';
+            ? 'http://localhost:5000/api/vi/getAll-quotations'
+            : 'http://localhost:5000/api/vi/getAll-invoices';
 
         const token = localStorage.getItem('token');
         const response = await fetch(url, {
