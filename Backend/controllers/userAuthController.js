@@ -58,8 +58,8 @@ const registerUser = async (data) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    await db.collection("Addusers").doc(email).set({
-      state: 'Acept',
+    await db.collection("Addusers").doc(data.email).set({
+      state: 'Accept',
       name :data.name,
       reg_date :new Date().toISOString('en-GB')
     }, { merge: true });
@@ -109,11 +109,21 @@ const loginUser = async (data) => {
       returnSecureToken: true,
     }
    );
-   console.log("Login successful");
+   
+  
+   const userDoc = await db.collection("users").doc(response.data.localId).get();
 
+if (!userDoc.exists) {
+return res.status(404).json({ message: "User data not found in Firestore" });
+
+}
+
+const userData = userDoc.data();
+console.log('login')
    return ({
     message: "Login successful",
     role:role,
+    name: userData.name,
     idToken: response.data.idToken,
     uid: response.data.localId,
   
