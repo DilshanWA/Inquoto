@@ -1,4 +1,4 @@
-
+const {db} = require("../config/firebase");
 
 
 
@@ -28,7 +28,7 @@ async function createInvoice(invoiceData) {
       total: invoiceData.total,
       status: invoiceData.status || 'pending',
       userID: invoiceData.uid || null,
-      userName:userName ||null
+      userName:invoiceData.userName ||null
     };
 
     // 3. Save to Firestore
@@ -72,32 +72,49 @@ async function getAllInvoices() {
 }
 
 // Update invoice by creating a new one with updated data
-async function updateInvoice(oldInvoiceId, updatedData) {
-  if (!oldInvoiceId || !updatedData) throw new Error("Invoice ID and updated data are required");
+async function updateInvoice(Data) {
+  if (!Data.invoiceId || !Data.updatedData || !Data.userEmail) {
+    throw new Error("Invoice ID, updated data, and user email are required");
+  }
+
+  const role = Data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
 
   try {
     // 1. Get the original invoice
-    const oldInvoiceRef = db.collection("invoices").doc(oldInvoiceId);
+    const oldInvoiceRef = db.collection("invoices").doc(Data.invoiceId);
     const oldInvoiceDoc = await oldInvoiceRef.get();
 
     if (!oldInvoiceDoc.exists) {
       return { success: false, message: "Original invoice not found" };
     }
 
-    // 2. Generate new invoice ID based on current date and time
+    const oldData = oldInvoiceDoc.data();
+
+    // 2. Check permission
+    if (role !== "super_admin" && oldData.userID !== userEmail) {
+      return { success: false, message: "Permission denied: you can only update your own invoices" };
+    }
+
+    // 3. Generate new invoice ID
     const now = new Date();
     const newInvoiceId = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
-    // 3. Create a new invoice document with updated data
-    await db.collection("invoices").doc(newInvoiceId).set({
-      ...oldInvoiceDoc.data(), // Preserve old data
-      ...updatedData,         // Overwrite with updated fields
-      updatedAt: now.toISOString(), // Optional: Track update time
-    });
+    // 4. Prepare updated invoice
+    const updatedInvoice = {
+      ...oldData,
+      ...Data.updatedData,
+      invoiceId: newInvoiceId,
+      updatedAt: now.toISOString(),
+      updatedBy: Data.userEmail,
+      originalInvoiceId: Data.invoiceId, // Track original invoice
+    };
+
+    // 5. Save as a new document
+    await db.collection("invoices").doc(newInvoiceId).set(updatedInvoice);
 
     return {
       success: true,
-      message: "Invoice updated by creating a new record",
+      message: "Invoice updated successfully and saved as a new record",
       newInvoiceId,
     };
   } catch (error) {
@@ -106,21 +123,29 @@ async function updateInvoice(oldInvoiceId, updatedData) {
   }
 }
 
+
 // Delete invoice by ID
-async function deleteInvoice(invoiceId) {
-  if (!invoiceId) throw new Error("Invoice ID is required");
+async function deleteInvoice(data) {
+  if (!data.invoiceId && !data.userEmail) throw new Error("Invoice ID Or Email is Miss");
+
+
+  const role = data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
 
   try {
-    // 1. Reference the document in the 'invoices' collection
-    const invoiceRef = db.collection("invoices").doc(invoiceId);
-
-    // 2. Check if the document exists
+    const invoiceRef = db.collection("invoices").doc(data.invoiceId);
     const doc = await invoiceRef.get();
+
     if (!doc.exists) {
       return { success: false, message: "Invoice not found" };
     }
 
-    // 3. Delete the document
+    const invoiceData = doc.data();
+
+    // 🔒 Admins can only delete their own invoices
+    if (role !== "super_admin" && invoiceData.userEmail !== data.userEmail) {
+      return { success: false, message: "Permission denied: you can only delete your own invoices" };
+    }
+
     await invoiceRef.delete();
 
     return { success: true, message: "Invoice deleted successfully" };
@@ -129,6 +154,7 @@ async function deleteInvoice(invoiceId) {
     throw new Error("Failed to delete invoice");
   }
 }
+
 
 
 module.exports = {getAllInvoices,createInvoice ,deleteInvoice,updateInvoice};

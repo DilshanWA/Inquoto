@@ -60,14 +60,14 @@ async function createQuotation(quotationData) {
   
 
 
+
   
-  
-  async function updateQuotation(updatedData, userEmail) {
+  async function updateQuotation(updatedData) {
     if (!updatedData || !updatedData.quotationId) {
       throw new Error("Quotation ID and updated data are required");
     }
   
-    const role = userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+    const role = updatedData.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
   
     try {
       const oldRef = db.collection("quotations").doc(updatedData.quotationId);
@@ -80,7 +80,7 @@ async function createQuotation(quotationData) {
       const oldData = oldDoc.data();
   
       // Check permission for admins (not super_admin)
-      if (role !== "super_admin" && oldData.customerEmail !== userEmail) {
+      if (role !== "super_admin" && oldData.customerEmail !==updatedData.userEmail) {
         return { success: false, message: "Permission denied. You can only update your own quotations." };
       }
   
@@ -93,8 +93,8 @@ async function createQuotation(quotationData) {
         ...updatedData,
         quotationId: newQuotationId,
         updatedAt: now.toISOString(),
-        originalQuotationId: updatedData.quotationId, // Keep reference to original
-        updatedBy: userEmail,
+        originalQuotationId: updatedData.quotationId,
+        updatedBy: updatedData.userEmail,
       };
   
       await db.collection("quotation_updates").doc(newQuotationId).set(updatedQuotation);
@@ -115,8 +115,14 @@ async function createQuotation(quotationData) {
 
   
   
-  async function deleteQuotation(quotationId) {
-    if (!quotationId) throw new Error("Quotation ID is required");
+  async function deleteQuotation(data) {
+    const { quotationId, userEmail } = data;
+  
+    if (!quotationId || !userEmail) {
+      throw new Error("Quotation ID and user email are required");
+    }
+  
+    const role = userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
   
     try {
       const ref = db.collection("quotations").doc(quotationId);
@@ -124,6 +130,17 @@ async function createQuotation(quotationData) {
   
       if (!doc.exists) {
         return { success: false, message: "Quotation not found" };
+      }
+  
+      const quotationData = doc.data();
+  
+      //  Permission check: only super_admins can delete any quotation Admins can only delete quotations they created
+       
+      if (role !== "super_admin" && quotationData.userID !== userEmail) {
+        return {
+          success: false,
+          message: "Permission denied: you can only delete your own quotations",
+        };
       }
   
       await ref.delete();
@@ -134,6 +151,7 @@ async function createQuotation(quotationData) {
       throw new Error("Failed to delete quotation");
     }
   }
+  
   
 
 

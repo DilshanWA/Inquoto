@@ -1,3 +1,5 @@
+
+
 const {
   createInvoice,
   getAllInvoices,
@@ -27,7 +29,7 @@ const create = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const result = await deleteInvoice(req.params.id);
+    const result = await deleteInvoice(req.body);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,7 +38,7 @@ const remove = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const result = await updateInvoice(req.params.id, req.body);
+    const result = await updateInvoice( req.body);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });

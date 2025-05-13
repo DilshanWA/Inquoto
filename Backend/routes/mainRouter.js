@@ -32,7 +32,7 @@ router.get("/getAll-quotations",authMiddleware,quotationController.getAll);
 //  Create a quotation
 router.post("/create-quotations",authMiddleware,quotationController.create);
 //  Delete a quotation
-router.delete("/delete-quotations/:id",authMiddleware,quotationController.remove);
+router.delete("/delete-quotations",authMiddleware,quotationController.remove);
 //  Update a quotation
 router.put("/update-quotations",authMiddleware,quotationController.update);
 
@@ -42,9 +42,9 @@ router.get("/getAll-invoices",authMiddleware,invoiceController.getAll);
 //  Create an invoice
 router.post("/create-invoices",authMiddleware,invoiceController.create);
 //  Delete an invoice
-router.delete("/delete-invoices/:id",authMiddleware,invoiceController.remove);
+router.delete("/delete-invoices",authMiddleware,invoiceController.remove);
 //  Update an invoice
-router.put("/update-invoices/:id",authMiddleware,invoiceController.update);
+router.put("/update-invoices",authMiddleware,invoiceController.update);
 
 
 //  Generate invoice PDF
