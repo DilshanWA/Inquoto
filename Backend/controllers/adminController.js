@@ -1,5 +1,7 @@
 const {admin,db} = require("../config/firebase");
+
 const nodemailer = require("nodemailer");
+const path = require("path");
 
 require('dotenv').config();
 
@@ -99,24 +101,32 @@ async function addAdminUser(email) {
 
     // 4. Send login link via email
 await transporter.sendMail({
-  from: '"Inquoto Admin Team" <yourEmail@gmail.com>',
+  from: 'QuantifyPro Admin Team',
   to: email,
-  subject: "Your Admin Access Link - Inquoto",
+  subject: "Your Admin Access Link - QuantifyPro",
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-      <h2 style="color: #333;">Welcome to Inquoto Admin Panel 🎉</h2>
+      <img src="cid:QuantifyProLogo" alt="QuantifyPro Logo" style="width: 100px; margin-bottom: 20px;" />
+      <h2 style="color: #333;">Welcome to QuantifyPro Admin Panel 🎉</h2>
       <p style="color: #555;">Hi there,</p>
       <p style="color: #555;">
-        You've been granted admin access to the Inquoto platform. Use the secure button below to sign in and manage your dashboard.
+        You've been granted admin access to the QuantifyPro platform. Use the secure button below to sign in and manage your dashboard.
       </p>
       <a href="${null}" style="display: inline-block; margin: 20px 0; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
         Click here to Login
       </a>
       <p style="color: #888; font-size: 14px;">Note: This link is valid for 24 hours and can only be used once.</p>
       <hr style="margin: 30px 0;">
-      <p style="color: #aaa; font-size: 12px;">If you did not expect this email, please ignore it. This is an automated message from Inquoto.</p>
+      <p style="color: #aaa; font-size: 12px;">If you did not expect this email, please ignore it. This is an automated message from QuantifyPro.</p>
     </div>
   `,
+  attachments: [
+    {
+      filename: 'logo.png',
+      path: path.join(__dirname, '../assets/logo.png'), // 👈 no require(), just path
+      cid: 'QuantifyProLogo' // this matches <img src="cid:QuantifyProLogo" />
+    }
+  ]
 });
 
 
