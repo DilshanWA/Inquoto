@@ -14,7 +14,7 @@ interface User {
   email: string;
   state:string
   role: string;
-  date: string;
+  reg_date: string;
 }
 
 export default function UserTable({ refreshKey }: TableProps)  {
@@ -29,7 +29,7 @@ useEffect(() => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/vi/dashboard', {
+      const response = await fetch('http://localhost:5000/api/vi/admin-details', {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -119,7 +119,7 @@ return (
                     {user.state}
                   </span>
                 </td>
-                <td className="px-4 py-3">{new Date(user.date).toLocaleDateString()}</td>
+                <td className="px-4 py-3">{new Date(user.reg_date).toLocaleDateString()}</td>
                 <td className="px-4 py-3 text-center">
                   <button
                     onClick={() => deleteUser(user.id)}
