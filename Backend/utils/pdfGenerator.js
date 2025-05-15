@@ -5,92 +5,128 @@ const path = require("path");
 async function generatePDF(data) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4 Size
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  const drawText = (text, x, y, size = 12, color = rgb(0, 0, 0)) => {
-    page.drawText(text, { x, y, size, font, color });
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const drawText = (text, x, y, size = 10, bold = false) => {
+    page.drawText(text, {
+      x,
+      y,
+      size,
+      font: bold ? fontBold : font,
+      color: rgb(0, 0, 0),
+    });
   };
 
-  let y = 800;
+  // === 1. Draw Header Image ===
+  const headerImageBytes = fs.readFileSync(
+    path.join(__dirname, "../assets/logo.png")
+  );
+  const headerImage = await pdfDoc.embedPng(headerImageBytes);
+  page.drawImage(headerImage, {
+    x: 20,
+    y: 680,
+    width: 550,
+    height: 120,
+  });
 
-  // === 1. Logo ===
-  try {
-    const logoBytes = fs.readFileSync(path.join(__dirname, "../assets/logo.png")); // Change path as needed
-    const logoImage = await pdfDoc.embedPng(logoBytes);
-    page.drawImage(logoImage, { x: 50, y: y - 60, width: 60, height: 60 });
-  } catch (err) {
-    drawText("Your Business Name", 50, y, 18);
-  }
+  // === 2. Table Layout ===
+  const startX = 30;
+  const startY = 620;
+  const tableWidth = 530;
+  const rowHeight = 25;
 
-  // === 2. Invoice Title ===
-  drawText(`Invoice ${data.invoiceId || "000000"}`, 450, y, 14);
-  y -= 30;
-  drawText(`Tax Invoice`, 450, y, 10);
-
-  // === 3. Bill To Section ===
-  y -= 60;
-  drawText("BILL TO", 50, y, 10);
-  y -= 15;
-  drawText(data.customerName || "Client Name", 50, y);
-  y -= 15;
-  drawText(data.customerAddress || "Client Address", 50, y);
-
-  // === 4. Invoice Metadata Box ===
-  const orange = rgb(1, 0.6, 0);
-  const dark = rgb(0.2, 0.2, 0.2);
-  const metaY = 690;
-  const metaX = 50;
-  const boxHeight = 30;
-  const boxWidth = 120;
-
-  const metaData = [
-    { title: "Invoice No.", value: data.invoiceId || "000000" },
-    { title: "Issue date", value: data.date || "N/A" },
-    { title: "Due date", value: data.validity || "N/A" },
-    { title: "Total due (LKR)", value: `Rs ${data.total?.toFixed(2) || "0.00"}`, dark: true },
+  const columns = [
+    { label: "Description", width: 260 },
+    { label: "Quantity", width: 70 },
+    { label: "Unit Price", width: 100 },
+    { label: "Total", width: 100 },
   ];
 
-  metaData.forEach((item, i) => {
-    const x = metaX + i * boxWidth;
-    const color = item.dark ? dark : orange;
-    page.drawRectangle({ x, y: metaY, width: boxWidth, height: boxHeight, color });
-    drawText(item.title, x + 5, metaY + 16, 8, rgb(1, 1, 1));
-    drawText(item.value, x + 5, metaY + 5, 10, rgb(1, 1, 1));
+  const items = [
+    {
+      description: "Web Development Service",
+      quantity: "1",
+      unitPrice: "100,000",
+      total: "100,000",
+    },
+    {
+      description: "UI/UX Design",
+      quantity: "1",
+      unitPrice: "35,000",
+      total: "35,000",
+    },
+    {
+      description: "Domain & Hosting (1 year)",
+      quantity: "1",
+      unitPrice: "20,000",
+      total: "20,000",
+    },
+  ];
+
+  const totalAmount = "155,000";
+
+  // === 3. Draw Table Header ===
+  let currentY = startY;
+  let currentX = startX;
+  columns.forEach((col) => {
+    drawText(col.label, currentX + 3, currentY - 15, 10, true);
+    currentX += col.width;
   });
 
-  // === 5. Table Header ===
-  let tableY = metaY - 60;
-  const tableStartX = 50;
-  drawText("Description", tableStartX, tableY);
-  drawText("Quantity", tableStartX + 250, tableY);
-  drawText("Unit Price", tableStartX + 350, tableY);
-  drawText("Amount", tableStartX + 450, tableY);
-  tableY -= 15;
-
-  // === 6. Items ===
-  data.items?.forEach(item => {
-    drawText(item.description, tableStartX, tableY);
-    drawText(item.quantity.toString(), tableStartX + 250, tableY);
-    drawText(`Rs ${item.unitPrice.toFixed(2)}`, tableStartX + 350, tableY);
-    drawText(`Rs ${(item.quantity * item.unitPrice).toFixed(2)}`, tableStartX + 450, tableY);
-    tableY -= 15;
+  // Horizontal line after header
+  page.drawLine({
+    start: { x: startX, y: currentY - rowHeight },
+    end: { x: startX + tableWidth, y: currentY - rowHeight },
+    thickness: 1,
+    color: rgb(0, 0, 0),
   });
 
-  // === 7. Totals ===
-  tableY -= 20;
-  drawText(`Subtotal: Rs ${data.total?.toFixed(2) || "0.00"}`, tableStartX + 350, tableY);
-  tableY -= 15;
-  drawText(`Note: ${data.note || "N/A"}`, tableStartX + 350, tableY); // Add note here if needed
-  tableY -= 15;
-  drawText(`Terms: ${data.terms || "N/A"}`, tableStartX + 350, tableY); // Add terms here if needed
-  tableY -= 15;
+  // === 4. Draw Rows ===
+  currentY -= rowHeight;
+  items.forEach((item) => {
+    currentX = startX;
+    drawText(item.description, currentX + 3, currentY - 15);
+    currentX += columns[0].width;
+    drawText(item.quantity, currentX + 3, currentY - 15);
+    currentX += columns[1].width;
+    drawText(item.unitPrice, currentX + 3, currentY - 15);
+    currentX += columns[2].width;
+    drawText(item.total, currentX + 3, currentY - 15);
+    currentY -= rowHeight;
 
-  // === 8. Footer ===
-  drawText("Your Business Name", 50, 40, 10);
-  drawText("5 Martin Pl, Sydney NSW", 50, 30, 10);
-  drawText("+61 2000 0000", 250, 30, 10);
-  drawText("yourbusinessname.com.au", 350, 30, 10);
-  drawText("email@yourbusinessname.com.au", 350, 20, 10);
+    // Horizontal line after each row
+    page.drawLine({
+      start: { x: startX, y: currentY },
+      end: { x: startX + tableWidth, y: currentY },
+      thickness: 1,
+      color: rgb(0, 0, 0),
+    });
+  });
+
+  // === 5. Draw Total Row ===
+  drawText("Total", startX + columns[0].width + columns[1].width + 3, currentY - 15, 10, true);
+  drawText(totalAmount, startX + columns[0].width + columns[1].width + columns[2].width + 3, currentY - 15, 10, true);
+  currentY -= rowHeight;
+
+  // === 6. Note & Terms ===
+  drawText("Note:", startX, currentY - 30, 10, true);
+  drawText("Please make the payment within 30 days.", startX, currentY - 45);
+
+  drawText("Terms & Conditions:", startX, currentY - 70, 10, true);
+  drawText("All goods sold are non-refundable.", startX, currentY - 85);
+
+  // === 7. Footer / Author Info ===
+  drawText("Generated by: Thusitha Gayan", 50, 100);
+  drawText("University: Uva Wellassa University, Sri Lanka", 50, 85);
+  drawText("Field: ICT Undergraduate", 50, 70);
+
+  drawText("Your Business Name", 50, 50);
+  drawText("5 Martin Pl, Sydney NSW", 50, 40);
+  drawText("+61 2000 0000", 250, 40);
+  drawText("yourbusinessname.com.au", 350, 40);
+  drawText("email@yourbusinessname.com.au", 350, 30);
 
   const pdfBytes = await pdfDoc.save();
   return pdfBytes;
