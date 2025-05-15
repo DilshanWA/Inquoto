@@ -15,6 +15,7 @@ type Document = {
   createdAt?: string;
   date?: string;
   userName?: string;
+  type?: string;
   creator?: string;
 };
 
@@ -139,72 +140,34 @@ const GenPdf = async (doc: Document) => {
 
     const token = localStorage.getItem('token');
 
+    const payload = {
+      ...doc,
+      docType: type, // Add this line to send the type (invoice or quotation)
+    };
+    console.log(payload);
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(doc),
+      body: JSON.stringify(payload),
     });
 
-    const contentType = response.headers.get('Content-Type');
+    if (!response.ok) throw new Error('Failed to generate PDF');
 
-    if (response.ok && contentType?.includes('application/pdf')) {
-      handleDownload(doc)
-      const blob = await response.blob();
-      const urlBlob = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = urlBlob;
-      link.download = `${type}_${Date.now()}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(urlBlob);
-    } else {
-      const errorText = await response.text(); // try reading it as text (HTML or JSON string)
-      throw new Error(`Failed to download PDF: ${errorText}`);
-    }
-  } catch (err: any) {
-    console.error('PDF download error:', err);
-    setError(err.message || 'Error generating PDF');
+    const blob = await response.blob();
+    const pdfURL = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = pdfURL;
+    link.download = `${doc.documentId || 'document'}.pdf`;
+    link.click();
+  } catch (error) {
+    console.error(error);
+    setError('Failed to generate PDF');
   }
 };
-  const handleDownload = async (doc: Document) => {
-    try {
-      const url =
-        type === 'quotation'
-          ? 'http://localhost:5000/api/vi/quotations/pdf'
-          : 'http://localhost:5000/api/vi/create-invoice-pdf';
-
-      const token = localStorage.getItem('token');
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(doc),
-      });
-
-      if (!response.ok) throw new Error('Failed to download PDF');
-
-      const blob = await response.blob();
-      const urlBlob = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = urlBlob;
-      link.download = `${type}_${Date.now()}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(urlBlob);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to download PDF');
-    }
-  };
-
 
 
   if (loading) return <div>Loading...</div>;
