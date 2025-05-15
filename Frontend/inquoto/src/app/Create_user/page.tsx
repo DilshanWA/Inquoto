@@ -82,9 +82,9 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/images/bg21.jpg')] bg-cover bg-center px-4 sm:px-8 md:px-12 py-10">
       <div className="bg-black rounded-2xl shadow-lg p-8 sm:p-10 w-full max-w-150 text-white">
-        <h1 className="text-4xl font-bold text-teal-600 mb-2">Hi!, Welcome to Inquoto</h1>
+        <h1 className="text-4xl font-bold text-teal-600 mb-2">Hi!, Welcome to QuantifyPro</h1>
         <h1 className="text-3xl font-bold mb-2">Create Your Account</h1>
-        <p className="text-gray-400 mb-5 text-sm">Create an account to get started with Inquoto.</p>
+        <p className="text-gray-400 mb-5 text-sm">Create an account to get started with QuantifyPro.</p>
 
         <form className="space-y-5 mt-10" onSubmit={handleSubmit}>
           <div>

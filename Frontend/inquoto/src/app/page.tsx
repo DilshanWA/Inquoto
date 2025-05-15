@@ -76,7 +76,7 @@ export default function LoginPage() {
 
         <div className="flex flex-col items-center justify-center h-full">
           <div className="justify-center text-left mb-10 w-1/2">
-            <h1 className="text-4xl font-bold text-gray-800">Welcome to <span className='text-teal-600'>QuantifyPro</span> </h1>
+            <h1 className="text-4xl font-bold text-gray-800">LOGIN </h1>
             <p className="text-black mt-2">Please enter your login credentials.</p>
           </div>
 
@@ -141,7 +141,19 @@ export default function LoginPage() {
         </div>
       </div>
       {/* Image Side */}
-      <div className="relative h-screen w-1/2 bg-[url('/images/bg13.jpg')] bg-cover bg-center"></div>
+      <div className="relative h-screen w-1/2 bg-[url(/images/bg25.jpg)] bg-cover  flex flex-col ">
+        <div className="absolute inset-0 bg-black/50  px-30 py-15 flex flex-col justify-center items-start">
+        <div className=''>
+          <h1 className='text-5xl font-medium'>Welcome to</h1>
+            <h2 className='text-6xl font-bold text-white'>QuantifyPro <span className='text-medium'>Dashboard</span></h2>
+            <p className='text-white text-xl mt-5'>Manage your Quotations & Invoices with Ease!</p>
+            <p className='text-white text-sm mt-5 font-light'>A secure and powerful platform for handling 
+            <br />all your business documents in one place.</p>
+          </div>
+          
+            <p className='relative top-95 flex-end'>Powerd By NeoMac Engineering</p>
+        </div>    
+      </div>
     </div> 
   );
 }
