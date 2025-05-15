@@ -141,7 +141,7 @@ export default function LoginPage() {
         </div>
       </div>
       {/* Image Side */}
-      <div className="relative h-screen w-1/2 bg-[url(/images/bg25.jpg)] bg-cover  flex flex-col ">
+      <div className="relative h-screen w-1/2 bg-[url(/images/bg13.jpg)] bg-cover  flex flex-col ">
         <div className="absolute inset-0 bg-black/50  px-30 py-15 flex flex-col justify-center items-start">
         <div className=''>
           <h1 className='text-5xl font-medium'>Welcome to</h1>
