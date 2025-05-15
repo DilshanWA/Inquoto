@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ProfileDropdown from "../profile/page";
 import { useSearch } from "@/app/context/SearchContext";
 import { useNotification } from "@/app/context/NotificationContext";
@@ -8,6 +8,24 @@ export default function Topbar() {
   const { searchQuery, setSearchQuery } = useSearch();
   const { notifications, clearNotifications } = useNotification();
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="flex justify-between items-center px-18 py-4 bg-white shadow">
@@ -18,7 +36,8 @@ export default function Topbar() {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="text-black placeholder:text-gray-400 bg-gray-100 px-4 py-3 rounded w-1/2"
       />
-      <div className="flex items-center space-x-4 relative">
+
+      <div className="flex items-center space-x-4 relative" ref={dropdownRef}>
         {/* Bell Icon */}
         <div
           className="relative cursor-pointer text-xl"
@@ -34,7 +53,7 @@ export default function Topbar() {
 
         {/* Notification Dropdown */}
         {showDropdown && (
-          <div className="absolute top-12 right-10 w-72 bg-white shadow-lg rounded p-4 z-0">
+          <div className="absolute top-12 right-10 w-72 bg-white shadow-lg rounded p-4 z-10">
             <div className="flex justify-between items-center mb-2">
               <span className="font-semibold text-gray-700">Notifications</span>
               <button

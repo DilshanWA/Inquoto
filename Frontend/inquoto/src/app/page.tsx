@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import ErrorPopup from '@/app/messages/loginError/page';
 import { useNotification } from "@/app/context/NotificationContext";
 
 
@@ -74,7 +73,6 @@ export default function LoginPage() {
     <div className="h-screen flex items-center bg-green-100">
       <div className="h-screen w-1/2 bg-white relative">
         {/* Error Popup will only appear inside this box */}
-        {error && <ErrorPopup message={error} onClose={() => setError('')} />}
 
         <div className="flex flex-col items-center justify-center h-full">
           <div className="justify-center text-left mb-10 w-1/2">

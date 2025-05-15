@@ -16,22 +16,26 @@ export default function InvoicePage() {
   };
 
   return (
-      <div className="p-8">
-        <h1 className="text-2xl mb-6 font-bold">Invoices</h1>
+  <div className="p-8">
+    <h1 className="text-2xl mb-6 font-bold">Invoices</h1>
 
-        {!isFormVisible && (
-          <button
-            onClick={handleCreateInvoiceClick}
-            className="mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Create Invoice
-          </button>
-        )}
+    {!isFormVisible && (
+      <>
+        <button
+          onClick={handleCreateInvoiceClick}
+          className="mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Create New Invoice
+        </button>
 
         <DocumentTable type="invoice" />
+      </>
+    )}
 
-        {/* Invoice form appears only when isFormVisible is true */}
-        {isFormVisible &&  <InvoiceForm type='invoice' handleCloseForm={handleCloseForm}  />}
-    </div>  
+    {/* Invoice form appears only when isFormVisible is true */}
+    {isFormVisible && (
+      <InvoiceForm type="invoice" handleCloseForm={handleCloseForm} />
+    )}
+  </div>
   );
 }

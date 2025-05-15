@@ -21,15 +21,17 @@ export default function QuotationPage() {
           <h1 className="text-2xl mb-6 font-bold">Quotations</h1>
 
         {!isFormVisible && (
-           <button
+          <>
+          <button
              onClick={handleCreateInvoiceClick}
              className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
            >
-             Create Quotation
+             Create New Quotation
            </button>
+            <DocumentTable type="quotation" />
+          </>
+           
          )}
-        <DocumentTable type="quotation" />
-
          
          {isFormVisible && <InvoiceForm type='quotation' handleCloseForm={handleCloseForm} />}
        </div>   

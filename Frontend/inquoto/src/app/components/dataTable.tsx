@@ -64,14 +64,15 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
   }, [type]);
 
   const filteredDocs = documents.filter((doc) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      doc.documentId?.toLowerCase().includes(query) ||
-      doc.customerName?.toLowerCase().includes(query) ||
-      doc.userName?.toLowerCase().includes(query) ||
-      doc.creator?.toLowerCase().includes(query)
-    );
-  });
+  const query = searchQuery.toLowerCase();
+  return (
+    doc.documentId?.toLowerCase().startsWith(query) ||
+    doc.customerName?.toLowerCase().startsWith(query) ||
+    doc.userName?.toLowerCase().startsWith(query) ||
+    doc.creator?.toLowerCase().startsWith(query)
+  );
+});
+
 
   const docsToRender = shouldSearch ? filteredDocs : documents;
   const paginatedDocs = docsToRender.slice(
@@ -79,23 +80,32 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
     currentPage * itemsPerPage
   );
 
-  const highlightMatch = (text: string = '', query: string = '') => {
-    if (!query) return text;
-    const parts = text.split(new RegExp(`(${query})`, 'gi'));
-    return (
-      <>
-        {parts.map((part, index) =>
-          part.toLowerCase() === query.toLowerCase() ? (
-            <span key={index} className="bg-yellow-200 font-semibold">
-              {part}
-            </span>
-          ) : (
-            <span key={index}>{part}</span>
-          )
-        )}
-      </>
-    );
-  };
+  useEffect(() => {
+  setCurrentPage(1);
+}, [searchQuery]);
+
+
+const highlightMatch = (text: string = '', query: string = '') => {
+  if (!query) return text;
+
+  const regex = new RegExp(`(${query})`, 'gi');
+  const parts = text.split(regex);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        regex.test(part) ? (
+          <span key={index} className="bg-yellow-200 font-semibold">
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      )}
+    </>
+  );
+};
+
 
   const GenPdf = async (document: Document) => {
   try {
@@ -178,7 +188,8 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
                 <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Status</th>
                 <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Created Date</th>
                 <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Created By</th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Action</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Preview</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Download</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -211,6 +222,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {highlightMatch(doc.userName || doc.creator, searchQuery)}
                   </td>
+                  <td className='px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline'>View PDF</td>
                   <td
                     onClick={() => GenPdf(doc)}
                     className="px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline"

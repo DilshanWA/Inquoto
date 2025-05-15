@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState } from 'react';
-import { useNotification } from "@/app/context/NotificationContext";
+import { useNotification } from '@/app/context/NotificationContext';
+import MessageBox from '@/app/messages/SuccessPopup';
 
 interface LineItem {
   description: string;
@@ -23,6 +26,8 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
   ]);
   const [note, setNote] = useState('');
   const [terms, setTerms] = useState('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem('token');
   const { addNotification } = useNotification();
 
@@ -31,8 +36,7 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
   };
 
   const handleRemoveItem = (index: number) => {
-    const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
+    setItems(items.filter((_, i) => i !== index));
   };
 
   const handleChangeItem = (index: number, field: keyof LineItem, value: string) => {
@@ -52,22 +56,36 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
     return items.reduce((total, item) => total + item.total, 0);
   };
 
+  const validateForm = () => {
+    if (!customerName || !customerAddress || !date || !validity) {
+      setMessage({ type: 'error', text: 'Please fill all required fields.' });
+      return false;
+    }
+
+    const hasValidItems = items.some(item => item.description && item.quantity > 0 && item.unitPrice > 0);
+    if (!hasValidItems) {
+      setMessage({ type: 'error', text: 'Please add at least one valid item.' });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Retrieve uid and name from localStorage
+    if (!validateForm()) return;
+
     const uid = localStorage.getItem('uid');
     const userName = localStorage.getItem('name');
 
-    // Ensure uid and name are available, else show an error
     if (!uid || !userName) {
-      console.error('User UID or name is missing in localStorage');
+      setMessage({ type: 'error', text: 'User information missing. Please login again.' });
       return;
     }
 
-    // Create formData including uid and name
     const formData = {
-      type, // <-- include type (invoice or quotation)
+      type,
       customerName,
       customerAddress,
       date,
@@ -76,47 +94,59 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
       note,
       terms,
       total: getTotalInvoice(),
-      uid,  // Include uid
-      userName, // Include name
+      uid,
+      userName,
     };
 
-    // Define the endpoint based on type
     const endpoint =
       type === 'invoice'
         ? 'http://localhost:5000/api/vi/create-invoices'
         : 'http://localhost:5000/api/vi/create-quotations';
 
     try {
+      setIsSubmitting(true);
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Assuming token is already set
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log(`${type} submitted:`, result);
-        handleCloseForm();
-        addNotification(`Successfully Create ${type}.`);
+        setMessage({ type: 'success', text: `${type} created successfully.` });
+        addNotification(`Successfully created ${type}.`);
+        setTimeout(() => {
+          handleCloseForm();
+        }, 900);
       } else {
-        console.error(`Failed to submit ${type}`);
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.message || `Failed to create ${type}.` });
       }
     } catch (error) {
-      console.error(`Error submitting ${type}:`, error);
+      console.error(error);
+      setMessage({ type: 'error', text: `An error occurred. Please try again.` });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-      <>
-      <div className="fixed inset-0 bg-black opacity-70 z-0 transition-opacity" />
-      <div className="flex items-center justify-center item-center p-4 text-center mt-30">
-        <div className="absolute w-full max-w-5xl transform overflow-hidden bg-white text-left shadow-xl transition-all rounded-lg">
+    <>
+      {message && (
+        <MessageBox
+          type={message.type}
+          text={message.text}
+          onClose={() => setMessage(null)}
+        />
+      )}
+      <div className="fixed">
+        <div className="relative w-full max-w-10xl transform overflow-hidden bg-white p-6 rounded-lg shadow-xl">
+          {/* Close Button */}
           <button
             onClick={handleCloseForm}
-            className="absolute 0 right-5 z-10 rounded-md bg-gray-100 p-2 text-gray-400 hover:text-gray-500"
+            className="absolute top-4 right-4 z-10 rounded-md bg-gray-100 p-2 text-gray-600 hover:text-gray-800"
           >
             <span className="sr-only">Close</span>
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -124,14 +154,13 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
             </svg>
           </button>
 
-          {/* Scrollable form container */}
-          <div className="max-h-[80vh] overflow-y-auto p-6">
-            <form className="space-y-4" onSubmit={handleSubmit}>
-
-              {/* Customer Info */}
+          {/* Form */}
+          <div className="max-h-[70vh] overflow-y-auto p-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Customer Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Customer Name*</label>
                   <input
                     type="text"
                     value={customerName}
@@ -141,7 +170,7 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Date</label>
+                  <label className="block text-sm font-medium text-gray-700">Date*</label>
                   <input
                     type="date"
                     value={date}
@@ -150,17 +179,17 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Customer Address</label>
+                  <label className="block text-sm font-medium text-gray-700">Customer Address*</label>
                   <input
                     type="text"
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
                     className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
-                    placeholder="Customer address"
+                    placeholder="Address"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Validity</label>
+                  <label className="block text-sm font-medium text-gray-700">Validity*</label>
                   <input
                     type="date"
                     value={validity}
@@ -205,13 +234,12 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
                     className="col-span-2 border border-gray-300 rounded-md py-2 px-2 text-center text-sm"
                     placeholder="Price"
                   />
-                  <div className="col-span-1 text-center text-gray-700">Rs{item.total.toFixed(2)}</div>
+                  <div className="col-span-1 text-center text-gray-700">Rs {item.total.toFixed(2)}</div>
                   <div className="col-span-1 text-center">
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
                       className="text-red-500 hover:text-red-700 cursor-pointer"
-                      title="Delete row"
                     >
                       🗑️
                     </button>
@@ -219,24 +247,24 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
                 </div>
               ))}
 
-              {/* Total */}
-              <div className="flex justify-end font-semibold text-gray-700 mt-4 text-sm">
-                <span>Total: Rs {getTotalInvoice().toFixed(2)}</span>
-              </div>
-
-              {/* Add New Item */}
+              {/* Add Line Item */}
               <div className="flex justify-end mt-2">
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="bg-[#050A30] text-white px-4 py-2 rounded-md hover:opacity-90 text-sm"
+                  className="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 text-sm"
                 >
                   + Add New Item
                 </button>
               </div>
 
+              {/* Total */}
+              <div className="flex justify-end font-semibold text-gray-700 text-sm mt-2">
+                <span>Total: Rs {getTotalInvoice().toFixed(2)}</span>
+              </div>
+
               {/* Note */}
-              <div className="mt-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Note</label>
                 <textarea
                   className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
@@ -248,7 +276,7 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
               </div>
 
               {/* Terms */}
-              <div className="mt-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Terms</label>
                 <textarea
                   className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
@@ -259,20 +287,22 @@ export default function InvoiceForm({ handleCloseForm, type }: InvoiceFormProps)
                 />
               </div>
 
-              {/* Submit Button */}
-              <div className="flex justify-end mt-4">
+              {/* Submit */}
+              <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#050A30] text-white px-6 py-3 rounded-md hover:opacity-90 text-sm"
+                  disabled={isSubmitting}
+                  className={`px-6 py-2 text-white rounded-md text-sm ${
+                    isSubmitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
-                  {type === 'invoice' ? 'Create Invoice' : 'Create Quotation'}
+                  {isSubmitting ? 'Submitting...' : `Create ${type}`}
                 </button>
               </div>
             </form>
           </div>
         </div>
       </div>
-   </>
-
+    </>
   );
 }

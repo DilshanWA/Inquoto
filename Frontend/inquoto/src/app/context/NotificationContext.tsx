@@ -1,7 +1,7 @@
 // NotificationContext.tsx
 
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState,ReactNode } from "react";
 
 interface NotificationContextType {
   notifications: string[];
@@ -10,6 +10,9 @@ interface NotificationContextType {
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+
+
+
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<string[]>([]);
