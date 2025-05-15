@@ -28,7 +28,7 @@ export default function QuotationPage() {
            >
              Create New Quotation
            </button>
-            <DocumentTable type="quotation" />
+            <DocumentTable type="Quotation" />
           </>
            
          )}

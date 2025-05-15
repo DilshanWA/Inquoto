@@ -20,7 +20,7 @@ type Document = {
 };
 
 type DocumentTableProps = {
-  type: 'quotation' | 'invoice';
+  type: 'Quotation' | 'Invoice';
 };
 
 const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
@@ -39,7 +39,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
       setLoading(true);
       try {
         const url =
-          type === 'quotation'
+          type === 'Quotation'
             ? 'http://localhost:5000/api/vi/getAll-quotations'
             : 'http://localhost:5000/api/vi/getAll-invoices';
 
@@ -54,7 +54,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
         if (!response.ok) throw new Error('Failed to fetch documents');
 
         const data = await response.json();
-        setDocuments(type === 'quotation' ? data.quotations || [] : data.invoices || []);
+        setDocuments(type === 'Quotation' ? data.quotations || [] : data.invoices || []);
       } catch (err: any) {
         console.error(err);
         setError('Failed to fetch documents');
@@ -103,7 +103,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
   const handleStatusChange = async (document: Document, newStatus: string) => {
     try {
       const token = localStorage.getItem('token');
-      const url = type === 'quotation'
+      const url = type === 'Quotation'
         ? `http://localhost:5000/api/vi/update-quotation-status/${document.documentId}`
         : `http://localhost:5000/api/vi/update-invoice-status/${document.documentId}`;
 
@@ -134,7 +134,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
 const GenPdf = async (doc: Document) => {
   try {
     const url =
-      type === 'quotation'
+      type === 'Quotation'
         ? 'http://localhost:5000/api/vi/quotations/pdf'
         : 'http://localhost:5000/api/vi/create-invoice-pdf';
 

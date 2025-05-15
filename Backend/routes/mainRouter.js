@@ -48,7 +48,7 @@ router.put("/update-invoices",authMiddleware,invoiceController.update);
 
 
 //  Generate invoice PDF
-router.post("/create-invoice-pdf",authMiddleware,invoiceController.genPDF);
+router.post("/create-invoice-pdf",invoiceController.genPDF);
 
 
 

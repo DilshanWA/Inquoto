@@ -28,7 +28,7 @@ export default function InvoicePage() {
           Create New Invoice
         </button>
 
-        <DocumentTable type="invoice" />
+        <DocumentTable type="Invoice" />
       </>
     )}
 
