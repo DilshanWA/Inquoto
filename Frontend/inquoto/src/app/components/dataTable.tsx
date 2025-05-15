@@ -1,7 +1,10 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { useSearch } from "@/app/context/SearchContext";
 
 type Document = {
+  body: any;
+  createElement(arg0: string): HTMLAnchorElement;
   id?: string;
   documentId?: string;
   client?: string;
@@ -41,7 +44,6 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
 
         const token = localStorage.getItem('token');
         const response = await fetch(url, {
-          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -52,8 +54,8 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
 
         const data = await response.json();
         setDocuments(type === 'quotation' ? data.quotations || [] : data.invoices || []);
-      } catch (error: any) {
-        console.error('Error fetching documents:', error);
+      } catch (err: any) {
+        console.error(err);
         setError('Failed to fetch documents');
       } finally {
         setLoading(false);
@@ -63,81 +65,39 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
     fetchDocuments();
   }, [type]);
 
-  const filteredDocs = documents.filter((doc) => {
-  const query = searchQuery.toLowerCase();
-  return (
-    doc.documentId?.toLowerCase().startsWith(query) ||
-    doc.customerName?.toLowerCase().startsWith(query) ||
-    doc.userName?.toLowerCase().startsWith(query) ||
-    doc.creator?.toLowerCase().startsWith(query)
-  );
-});
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
+  const filteredDocs = documents.filter((doc) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      doc.documentId?.toLowerCase().startsWith(query) ||
+      doc.customerName?.toLowerCase().startsWith(query) ||
+      doc.userName?.toLowerCase().startsWith(query) ||
+      doc.creator?.toLowerCase().startsWith(query)
+    );
+  });
 
   const docsToRender = shouldSearch ? filteredDocs : documents;
-  const paginatedDocs = docsToRender.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedDocs = docsToRender.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  useEffect(() => {
-  setCurrentPage(1);
-}, [searchQuery]);
-
-
-const highlightMatch = (text: string = '', query: string = '') => {
-  if (!query) return text;
-
-  const regex = new RegExp(`(${query})`, 'gi');
-  const parts = text.split(regex);
-
-  return (
-    <>
-      {parts.map((part, index) =>
-        regex.test(part) ? (
-          <span key={index} className="bg-yellow-200 font-semibold">
-            {part}
-          </span>
-        ) : (
-          <span key={index}>{part}</span>
-        )
-      )}
-    </>
-  );
-};
-
-
-  const GenPdf = async (document: Document) => {
-  try {
-    const url =
-      type === 'quotation'
-        ? 'http://localhost:5000/api/vi/quotations/pdf'
-        : 'http://localhost:5000/api/vi/Create-invoice-pdf';
-
-    const token = localStorage.getItem('token');
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(document),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to generate PDF');
-    }
-
-    console.log('PDF generation response:', data);
-  } catch (error: any) {
-    console.error('Error generating PDF:', error.message);
-    setError(error.message);
-  }
-};
-
+  const highlightMatch = (text: string = '', query: string = '') => {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <>
+        {parts.map((part, i) =>
+          regex.test(part) ? (
+            <span key={i} className="bg-yellow-200 font-semibold">{part}</span>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        )}
+      </>
+    );
+  };
 
   const handleStatusChange = async (document: Document, newStatus: string) => {
     try {
@@ -157,18 +117,95 @@ const highlightMatch = (text: string = '', query: string = '') => {
 
       if (!response.ok) throw new Error('Failed to update status');
 
-      setDocuments((prevDocs) =>
-        prevDocs.map((doc) =>
+      setDocuments((prev) =>
+        prev.map((doc) =>
           (doc.documentId === document.documentId || doc.id === document.id)
             ? { ...doc, status: newStatus }
             : doc
         )
       );
-    } catch (error) {
-      console.error('Error updating status:', error);
+    } catch (err) {
+      console.error(err);
       setError('Failed to update status');
     }
   };
+
+const GenPdf = async (doc: Document) => {
+  try {
+    const url =
+      type === 'quotation'
+        ? 'http://localhost:5000/api/vi/quotations/pdf'
+        : 'http://localhost:5000/api/vi/create-invoice-pdf';
+
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(doc),
+    });
+
+    const contentType = response.headers.get('Content-Type');
+
+    if (response.ok && contentType?.includes('application/pdf')) {
+      handleDownload(doc)
+      const blob = await response.blob();
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.download = `${type}_${Date.now()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(urlBlob);
+    } else {
+      const errorText = await response.text(); // try reading it as text (HTML or JSON string)
+      throw new Error(`Failed to download PDF: ${errorText}`);
+    }
+  } catch (err: any) {
+    console.error('PDF download error:', err);
+    setError(err.message || 'Error generating PDF');
+  }
+};
+  const handleDownload = async (doc: Document) => {
+    try {
+      const url =
+        type === 'quotation'
+          ? 'http://localhost:5000/api/vi/quotations/pdf'
+          : 'http://localhost:5000/api/vi/create-invoice-pdf';
+
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(doc),
+      });
+
+      if (!response.ok) throw new Error('Failed to download PDF');
+
+      const blob = await response.blob();
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.download = `${type}_${Date.now()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(urlBlob);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to download PDF');
+    }
+  };
+
+
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
@@ -222,7 +259,9 @@ const highlightMatch = (text: string = '', query: string = '') => {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {highlightMatch(doc.userName || doc.creator, searchQuery)}
                   </td>
-                  <td className='px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline'>View PDF</td>
+                  <td className="px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline">
+                    View PDF
+                  </td>
                   <td
                     onClick={() => GenPdf(doc)}
                     className="px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline"
@@ -236,7 +275,6 @@ const highlightMatch = (text: string = '', query: string = '') => {
         )}
       </div>
 
-      {/* Pagination Controls */}
       {docsToRender.length > itemsPerPage && (
         <div className="flex justify-center mt-4 space-x-2">
           <button

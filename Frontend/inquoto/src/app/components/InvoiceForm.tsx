@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useNotification } from '@/app/context/NotificationContext';
-import MessageBox from '@/app/messages/SuccessPopup';
+import MessageBox from '@/app/messages/InvQuoMsg/SuccessPopup';
 
 interface LineItem {
   description: string;
