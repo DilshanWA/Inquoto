@@ -6,7 +6,6 @@ async function generatePDF(data) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4 size
 
-  const { width, height } = page.getSize();
 
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -53,7 +52,7 @@ async function generatePDF(data) {
 
   const items = data.items || [];
   const totalAmount = String(data.total ?? "0.00");
-
+  
   drawText("Estimate:", startX, startY + 150, 10, true);
   drawText(data.companyName, startX, startY + 130, 10);
   drawText(data.companyAddress, startX, startY + 110, 10);
