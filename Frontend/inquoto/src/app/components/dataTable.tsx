@@ -1,10 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useSearch } from "@/app/context/SearchContext";
+import { useSearch } from '@/app/context/SearchContext';
 
 type Document = {
-  body: any;
-  createElement(arg0: string): HTMLAnchorElement;
   id?: string;
   documentId?: string;
   client?: string;
@@ -13,21 +11,23 @@ type Document = {
   amount?: number;
   status?: string;
   createdAt?: string;
-  date?: string;
   userName?: string;
-  type?: string;
   creator?: string;
+  [key: string]: any;
 };
 
 type DocumentTableProps = {
   type: 'Quotation' | 'Invoice';
+  onEditDocument?: (doc: Document) => void;
+  
 };
 
-const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
+const DocumentTable: React.FC<DocumentTableProps> = ({ type, onEditDocument }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { searchQuery } = useSearch();
+  const userRole = localStorage.getItem('role')
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -75,6 +75,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
     return (
       doc.documentId?.toLowerCase().startsWith(query) ||
       doc.customerName?.toLowerCase().startsWith(query) ||
+      doc.client?.toLowerCase().startsWith(query) ||
       doc.userName?.toLowerCase().startsWith(query) ||
       doc.creator?.toLowerCase().startsWith(query)
     );
@@ -91,7 +92,9 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
       <>
         {parts.map((part, i) =>
           regex.test(part) ? (
-            <span key={i} className="bg-yellow-200 font-semibold">{part}</span>
+            <span key={i} className="bg-yellow-200 font-semibold">
+              {part}
+            </span>
           ) : (
             <span key={i}>{part}</span>
           )
@@ -103,9 +106,10 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
   const handleStatusChange = async (document: Document, newStatus: string) => {
     try {
       const token = localStorage.getItem('token');
-      const url = type === 'Quotation'
-        ? `http://localhost:5000/api/vi/update-quotation-status/${document.documentId}`
-        : `http://localhost:5000/api/vi/update-invoice-status/${document.documentId}`;
+      const url =
+        type === 'Quotation'
+          ? `http://localhost:5000/api/vi/update-quotation-status/${document.documentId}`
+          : `http://localhost:5000/api/vi/update-invoice-status/${document.documentId}`;
 
       const response = await fetch(url, {
         method: 'PUT',
@@ -120,9 +124,7 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
 
       setDocuments((prev) =>
         prev.map((doc) =>
-          (doc.documentId === document.documentId || doc.id === document.id)
-            ? { ...doc, status: newStatus }
-            : doc
+          doc.documentId === document.documentId || doc.id === document.id ? { ...doc, status: newStatus } : doc
         )
       );
     } catch (err) {
@@ -131,43 +133,88 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type }) => {
     }
   };
 
-const GenPdf = async (doc: Document) => {
+  const GenPdf = async (doc: Document) => {
+    try {
+      const url =
+        type === 'Quotation'
+          ? 'http://localhost:5000/api/vi/create-quotation-pdf'
+          : 'http://localhost:5000/api/vi/create-invoice-pdf';
+
+      const token = localStorage.getItem('token');
+
+      const payload = {
+        ...doc,
+        docType: type,
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate PDF');
+
+      const blob = await response.blob();
+      const pdfURL = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = pdfURL;
+      link.download = `${doc.documentId || 'document'}.pdf`;
+      link.click();
+    } catch (error) {
+      console.error(error);
+      setError('Failed to generate PDF');
+    }
+  };
+
+  const handleViewPdf = (doc: Document) => {
+    alert('View PDF functionality not implemented yet.');
+  };
+
+  // New: Handle Edit
+  const handleEdit = (doc: Document) => {
+    if (!window.confirm(`Are you sure you want to edit document "${doc.documentId || doc.id}"?`)) return;
+    if (onEditDocument) {
+      onEditDocument(doc);   // Pass doc to parent to open form
+    }
+  };
+
+  // New: Handle Delete
+const handleDelete = async (doc: Document) => {
+  if (!window.confirm(`Are you sure you want to delete document "${doc.documentId || doc.id}"?`)) return;
+
   try {
-    const url =
-      type === 'Quotation'
-        ? 'http://localhost:5000/api/vi/quotations/pdf'
-        : 'http://localhost:5000/api/vi/create-invoice-pdf';
-
     const token = localStorage.getItem('token');
+    const userEmail = localStorage.getItem('email');
+    const url = type === 'Quotation'
+      ? `http://localhost:5000/api/vi/delete-quotations/${doc.quotationId}`
+      : `http://localhost:5000/api/vi/delete-invoices/${doc.invoiceId}`;
 
-    const payload = {
-      ...doc,
-      docType: type, // Add this line to send the type (invoice or quotation)
-    };
-    console.log(payload);
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
+        'user-email': userEmail || '',
       },
-      body: JSON.stringify(payload),
     });
 
-    if (!response.ok) throw new Error('Failed to generate PDF');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete document');
+    }
 
-    const blob = await response.blob();
-    const pdfURL = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = pdfURL;
-    link.download = `${doc.documentId || 'document'}.pdf`;
-    link.click();
-  } catch (error) {
-    console.error(error);
-    setError('Failed to generate PDF');
+    setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+  } catch (err) {
+    console.error(err);
+    setError('Failed to delete document');
   }
 };
+
 
 
   if (loading) return <div>Loading...</div>;
@@ -190,39 +237,46 @@ const GenPdf = async (doc: Document) => {
                 <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Created By</th>
                 <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Preview</th>
                 <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Download</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Edit</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-black uppercase">Delete</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedDocs.map((doc) => (
                 <tr key={doc.id || doc.documentId}>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {highlightMatch(doc.documentId || doc.id, searchQuery)}
+                    {highlightMatch(doc.documentId || doc.id || '', searchQuery)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {highlightMatch(doc.client || doc.customerName, searchQuery)}
+                    {highlightMatch(doc.client || doc.customerName || '', searchQuery)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{doc.total || doc.amount}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{doc.total ?? doc.amount ?? '-'}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    <select
-                      value={doc.status || 'Pending'}
-                      onChange={(e) => handleStatusChange(doc, e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Rejected">Rejected</option>
-                      <option value="Completed">Completed</option>
-                    </select>
+                    {userRole === 'super_admin' ? (
+                      <select
+                        value={doc.status || 'Pending'}
+                        onChange={(e) => handleStatusChange(doc, e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    ) : (
+                      <span>{doc.status || 'Pending'}</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {doc.createdAt
-                      ? new Date(doc.createdAt).toLocaleDateString()
-                      : 'N/A'}
+                    {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : 'N/A'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {highlightMatch(doc.userName || doc.creator, searchQuery)}
+                    {highlightMatch(doc.userName || doc.creator || '', searchQuery)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline">
+                  <td
+                    onClick={() => handleViewPdf(doc)}
+                    className="px-6 py-4 text-sm text-blue-600 cursor-pointer hover:underline"
+                  >
                     View PDF
                   </td>
                   <td
@@ -231,6 +285,21 @@ const GenPdf = async (doc: Document) => {
                   >
                     Download PDF
                   </td>
+               
+                  <td
+                      onClick={() => handleEdit(doc)}
+                      className="px-6 py-4 text-sm text-green-600 cursor-pointer hover:underline"
+                      title="Edit document"
+                    >
+                      ✏️
+                  </td>
+                  <td
+                    onClick={() => handleDelete(doc)}
+                    className="px-6 py-4 text-sm text-red-600 cursor-pointer hover:underline"
+                    title="Delete document"
+                  >
+                    🗑️
+                  </td> 
                 </tr>
               ))}
             </tbody>
@@ -247,7 +316,9 @@ const GenPdf = async (doc: Document) => {
           >
             Previous
           </button>
-          <span className="px-4 py-2">Page {currentPage}</span>
+          <span className="px-4 py-2">
+            Page {currentPage} of {Math.ceil(docsToRender.length / itemsPerPage)}
+          </span>
           <button
             onClick={() =>
               setCurrentPage((prev) =>
