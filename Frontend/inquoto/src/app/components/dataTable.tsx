@@ -1,6 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useSearch } from '@/app/context/SearchContext';
+import PopupMessage from '../messages/InvQuoMsg/SuccessPopup';
+import Message from './../messages/InvQuoMsg/SuccessPopup';
 
 type Document = {
   id?: string;
@@ -103,42 +105,53 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type, onEditDocument }) =
     );
   };
 
-  const handleStatusChange = async (document: Document, newStatus: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const url =
-        type === 'Quotation'
-          ? `http://localhost:5000/api/vi/update-quotation-status/${document.documentId}`
-          : `http://localhost:5000/api/vi/update-invoice-status/${document.documentId}`;
+const handleStatusChange = async (document: Document, newStatus: string) => {
+  try {
+    const token = localStorage.getItem('token');
+    const userEmail = localStorage.getItem('email');
+    const documentId = document.documentId || document.id;
 
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+    console.log(newStatus);
+    console.log(documentId);
 
-      if (!response.ok) throw new Error('Failed to update status');
+    const url =
+      type === 'Quotation'
+        ? `http://localhost:5000/api/vi/quotations-state/${documentId}`
+        : `http://localhost:5000/api/vi/invoices-state/${documentId}`;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+         Authorization: `Bearer ${token}`,
+        'user-email': userEmail || '',
+      },
+      body: JSON.stringify({ state: newStatus }), // match your backend expectation
+    });
+
+    if (!response.ok) throw new Error('Failed to update status');
 
       setDocuments((prev) =>
-        prev.map((doc) =>
-          doc.documentId === document.documentId || doc.id === document.id ? { ...doc, status: newStatus } : doc
+        prev.map((docItem) =>
+          (docItem.documentId && docItem.documentId === document.documentId) ||
+          (docItem.id && docItem.id === document.id)
+            ? { ...docItem, status: newStatus }
+            : docItem
         )
       );
-    } catch (err) {
-      console.error(err);
-      setError('Failed to update status');
-    }
-  };
 
-  const GenPdf = async (doc: Document) => {
+  } catch (err) {
+    console.error(err);
+    setError('Failed to update status');
+  }
+};
+ 
+const GenPdf = async (doc: Document) => {
     try {
       const url =
         type === 'Quotation'
-          ? 'http://localhost:5000/api/vi/create-quotation-pdf'
-          : 'http://localhost:5000/api/vi/create-invoice-pdf';
+          ? 'http://localhost:5000/api/vi/create-pdf'
+          : 'http://localhost:5000/api/vi/create-pdf';
 
       const token = localStorage.getItem('token');
 
@@ -160,24 +173,33 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ type, onEditDocument }) =
 
       const blob = await response.blob();
       const pdfURL = window.URL.createObjectURL(blob);
+      return pdfURL;
 
-      const link = document.createElement('a');
-      link.href = pdfURL;
-      link.download = `${doc.documentId || 'document'}.pdf`;
-      link.click();
+      
+
     } catch (error) {
       console.error(error);
       setError('Failed to generate PDF');
     }
   };
 
-  const handleViewPdf = (doc: Document) => {
-    alert('View PDF functionality not implemented yet.');
+  const handleViewPdf = async (doc: Document) => {
+      const pdfURL = await GenPdf(doc);
+      if (pdfURL) {
+        window.open(pdfURL, '_blank');
+      }
   };
 
   // New: Handle Edit
   const handleEdit = (doc: Document) => {
     if (!window.confirm(`Are you sure you want to edit document "${doc.documentId || doc.id}"?`)) return;
+    const currentUser = localStorage.getItem('uid');
+    const role = localStorage.getItem('role');
+    if (doc.userID !== currentUser && role !== 'super_admin') {
+      alert('You cannot edit a document that you did not create.');
+      return;
+    }
+
     if (onEditDocument) {
       onEditDocument(doc);   // Pass doc to parent to open form
     }
@@ -214,8 +236,6 @@ const handleDelete = async (doc: Document) => {
     setError('Failed to delete document');
   }
 };
-
-
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
@@ -264,7 +284,17 @@ const handleDelete = async (doc: Document) => {
                         <option value="Completed">Completed</option>
                       </select>
                     ) : (
-                      <span>{doc.status || 'Pending'}</span>
+                      <span
+                      className={`
+                        px-2 py-1 rounded-full text-xs font-semibold
+                        ${doc.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                          doc.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                          doc.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                          doc.status === 'Completed' ? 'bg-blue-100 text-blue-800' : ''}
+                      `}
+                    >
+                      {doc.status}
+                    </span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
@@ -305,6 +335,7 @@ const handleDelete = async (doc: Document) => {
             </tbody>
           </table>
         )}
+        
       </div>
 
       {docsToRender.length > itemsPerPage && (

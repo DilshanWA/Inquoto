@@ -95,21 +95,41 @@ export default function InvoiceForm({ handleCloseForm, type, initialData }: Invo
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    const uid = localStorage.getItem('uid');
-    const userName = localStorage.getItem('name');
-    const userEmail = localStorage.getItem('email');
+  const uid = localStorage.getItem('uid');
+  const userName = localStorage.getItem('name');
+  const userEmail = localStorage.getItem('email');
 
-    if (!uid || !userName) {
-      setMessage({ type: 'error', text: 'User information missing. Please login again.' });
-      return;
-    }
+  if (!uid || !userEmail || !userName) {
+    setMessage({ type: 'error', text: 'User information missing. Please login again.' });
+    return;
+  }
 
-    const formData = {
+  const createData = {
+    type,
+    customerName,
+    customerAddress,
+    date,
+    validity,
+    items,
+    note,
+    terms,
+    total: getTotalInvoice(),
+    uid,
+    userName,
+    userEmail,
+  };
+
+  const updateData = {
+    invoiceId: initialData?.id,
+    quotationId: initialData?.id,
+    uid,
+    userEmail,
+    updatedData: {
       type,
       customerName,
       customerAddress,
@@ -119,56 +139,60 @@ export default function InvoiceForm({ handleCloseForm, type, initialData }: Invo
       note,
       terms,
       total: getTotalInvoice(),
-      uid,
-      userName,
-      userEmail
-    };
-
-    let endpoint = '';
-    let method = 'POST';
-
-    if (isEditMode && initialData?.id) {
-      endpoint =
-        type === 'invoice'
-          ? `http://localhost:5000/api/vi/update-invoice/${initialData.id}`
-          : `http://localhost:5000/api/vi/update-quotation/${initialData.id}`;
-      method = 'PUT';
-    } else {
-      endpoint =
-        type === 'invoice'
-          ? 'http://localhost:5000/api/vi/create-invoices'
-          : 'http://localhost:5000/api/vi/create-quotations';
-      method = 'POST';
-    }
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: `${type} ${isEditMode ? 'updated' : 'created'} successfully.` });
-        addNotification(`Successfully ${isEditMode ? 'updated' : 'created'} ${type}.`);
-        setTimeout(() => {
-          handleCloseForm();
-        }, 900);
-      } else {
-        const error = await response.json();
-        setMessage({ type: 'error', text: error.message || `Failed to ${isEditMode ? 'update' : 'create'} ${type}.` });
-      }
-    } catch (error) {
-      console.error(error);
-      setMessage({ type: 'error', text: `An error occurred. Please try again.` });
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
   };
+
+  const formData = isEditMode ? updateData : createData;
+
+  const endpoint = isEditMode
+    ? type === 'invoice'
+      ? `http://localhost:5000/api/vi/update-invoices`
+      : `http://localhost:5000/api/vi/update-quotations`
+    : type === 'invoice'
+      ? 'http://localhost:5000/api/vi/create-invoices'
+      : 'http://localhost:5000/api/vi/create-quotations';
+
+  const method = isEditMode ? 'PUT' : 'POST';
+
+  try {
+    setIsSubmitting(true);
+
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const result = await response.json(); // ✅ Always parse the response body
+
+    if (response.ok && result.success) {
+      setMessage({
+        type: 'success',
+        text: `${type} ${isEditMode ? 'updated' : 'created'} successfully.`,
+      });
+      addNotification(`Successfully ${isEditMode ? 'updated' : 'created'} ${type}.`);
+
+      setTimeout(() => {
+        handleCloseForm();
+      }, 900);
+    } else {
+      setMessage({
+        type: 'error',
+        text: result.message || `Failed to ${isEditMode ? 'update' : 'create'} ${type}.`,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 
   return (
     <>
