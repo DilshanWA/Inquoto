@@ -173,9 +173,13 @@ const GenPdf = async (doc: Document) => {
 
       const blob = await response.blob();
       const pdfURL = window.URL.createObjectURL(blob);
-      return pdfURL;
 
-      
+      const link = document.createElement('a');
+      link.href = pdfURL;
+      link.download = `${doc.id || 'document'}.pdf`;
+      link.click();
+
+      return pdfURL;
 
     } catch (error) {
       console.error(error);
@@ -184,10 +188,39 @@ const GenPdf = async (doc: Document) => {
   };
 
   const handleViewPdf = async (doc: Document) => {
-      const pdfURL = await GenPdf(doc);
-      if (pdfURL) {
-        window.open(pdfURL, '_blank');
-      }
+         try {
+      const url =
+        type === 'Quotation'
+          ? 'http://localhost:5000/api/vi/create-pdf'
+          : 'http://localhost:5000/api/vi/create-pdf';
+
+      const token = localStorage.getItem('token');
+
+      const payload = {
+        ...doc,
+        docType: type,
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate PDF');
+
+      const blob = await response.blob();
+      const pdfURL = window.URL.createObjectURL(blob);
+
+      window.open(pdfURL, '_blank')
+
+    } catch (error) {
+      console.error(error);
+      setError('Failed to generate PDF');
+    }
   };
 
   // New: Handle Edit
