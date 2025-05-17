@@ -35,6 +35,8 @@ router.post("/create-quotations",authMiddleware,quotationController.create);
 router.delete("/delete-quotations",authMiddleware,quotationController.remove);
 //  Update a quotation
 router.put("/update-quotations",authMiddleware,quotationController.update);
+//update state
+router.put("/quotations-state",authMiddleware,userController.State);
 
 
 //  GET all invoices
@@ -46,11 +48,11 @@ router.delete("/delete-invoices",authMiddleware,invoiceController.remove);
 //  Update an invoice
 router.put("/update-invoices",authMiddleware,invoiceController.update);
 //update state
-router.put("/invoices-state",authMiddleware,invoiceController.State);
+router.put("/invoices-state",authMiddleware,userController.State);
 
 
 //  Generate invoice PDF
-router.post("/create-pdf",authMiddleware,invoiceController.genPDF);
+router.post("/create-pdf",invoiceController.genPDF);
 
 
 

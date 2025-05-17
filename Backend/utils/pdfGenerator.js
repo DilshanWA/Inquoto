@@ -27,18 +27,13 @@ async function generatePDF(data) {
   const headerImage = await pdfDoc.embedPng(headerImageBytes);
   page.drawImage(headerImage, {
     x: 500,
-    y: 770,
+    y: 740,
     width: 50,
     height: 40,
   });
 
 
   
-drawText("Date:", 460, 582 + 150, 10, true);
-drawText(data.date, 460 + 60, 582 + 150);
-
-drawText("Valid Until:", 460, 582 + 130, 10, true);
-drawText(data.validity, 460 + 60, 582 + 130);
 
 
 
@@ -62,18 +57,20 @@ drawText(data.validity, 460 + 60, 582 + 130);
 
   drawText(data.docType, 595/2, startY + 190, 20, true);
   
- drawText("Date:", 460, 582 + 150, 10, true);
-drawText(data.date, 460 + 60, 582 + 150);
+ drawText("Date:", 460, 582 + 130, 10, true);
+drawText(data.date, 460 + 60, 582 + 130);
 
 
-drawText("Valid Until:", 460, 582 + 130, 10, true);
-drawText(data.validity, 460 + 60, 582 + 130);
+drawText("Valid Until:", 460, 582 + 110, 10, true);
+drawText(data.validity, 460 + 60, 572 + 120);
 
+ drawText("Estimate for:", startX, startY + 140, 10, true);
+ drawText(data.customerName, startX, startY + 115, 10);
+ drawText(data.customerAddress, startX, startY + 100, 10);
 
-  
-  drawText("Estimate for:", startX, startY + 80, 10, true);
-  drawText(data.customerName, startX, startY + 60, 10);
-  drawText(data.customerAddress, startX, startY + 40, 10);
+  drawText("Estimate for:", startX, startY + 70, 10, true);
+  drawText(data.customerName, startX, startY + 50, 10);
+  drawText(data.customerAddress, startX, startY + 35, 10);
   // === 5. Table Header ===
   let currentY = startY;
   let currentX = startX;

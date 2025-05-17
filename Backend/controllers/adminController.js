@@ -237,8 +237,58 @@ async function RemoveAdmin(email) {
 
 
 
+async function updateInvoiceState(Data) {
+  if (!Data.invoiceID || !Data.updatedData?.state || !Data.userEmail || !Data.type) {
+    throw new Error("Document ID, new state, user email, and type are required");
+  }
+
+  const role = Data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+
+  // Choose the collection based on type
+  const collectionName = Data.type === "quotations" ? "quotations" : "invoices";
+
+  try {
+    // 1. Reference the correct document
+    const docRef = db.collection(collectionName).doc(Data.invoiceID);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      return { success: false, message: `${Data.type} not found` };
+    }
+
+    // 2. Only super admin can update the state directly
+    if (role !== "super_admin") {
+      return {
+        success: false,
+        message: "Permission denied: only super admin can update state",
+      };
+    }
+
+    // 3. Update only the 'state' field
+    await docRef.update({
+      status: Data.updatedData.state,
+      updatedAt: new Date().toISOString(),
+      updatedBy: Data.userEmail,
+    });
+
+    return {
+      success: true,
+      message: `${Data.type} state updated to "${Data.updatedData.state}"`,
+      id: Data.id,
+    };
+
+  } catch (error) {
+    console.error(`Error updating ${Data.type} state:`, error);
+    throw new Error(`Failed to update ${Data.type} state`);
+  }
+}
+
+
+
+
 module.exports = {
 
   addAdminUser , RemoveAdmin,
-  getadminDetails ,getUserProfile
+  getadminDetails ,getUserProfile,
+  updateInvoiceState
 };
