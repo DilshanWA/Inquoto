@@ -29,8 +29,15 @@ const transporter = nodemailer.createTransport({
 
 //Get profile data
 
+
 async function getUserProfile(data) {
   try {
+    // 🚫 Check if user ID is missing
+    if (!data || typeof data !== 'string') {
+      throw new Error('Invalid user ID');
+    }
+
+    // 1. Get user profile by ID
     const userRef = db.collection('users').doc(data);
     const userDoc = await userRef.get();
 
@@ -40,6 +47,28 @@ async function getUserProfile(data) {
 
     const userData = userDoc.data();
 
+    // 2. Total Users Count
+    const usersSnapshot = await db.collection('users').get();
+    const totalUsers = usersSnapshot.size;
+
+    // 3. Pending Approvals Count
+    const pendingSnapshot = await db.collection('users')
+      .where('register_state', '==', 'pending')
+      .get();
+    const pendingApprovals = pendingSnapshot.size;
+
+    // 4. Quotations for this user
+    const quotationsSnapshot = await db.collection('quotations')
+      .where('userID', '==', data)
+      .get();
+    const totalQuotations = quotationsSnapshot.size;
+
+    // 5. Invoices for this user
+    const invoicesSnapshot = await db.collection('invoices')
+      .where('userID', '==', data)
+      .get();
+    const totalInvoices = invoicesSnapshot.size;
+
     return {
       success: true,
       profile: {
@@ -47,17 +76,25 @@ async function getUserProfile(data) {
         name: userData.name,
         register_state: userData.register_state,
         role: userData.role,
-        createdAt: userData.createdAt, 
+        createdAt: userData.createdAt,
       },
+      stats: {
+        totalUsers,
+        pendingApprovals,
+        totalQuotations,
+        totalInvoices
+      }
     };
+
   } catch (error) {
-    console.error('Error fetching user profile:', error);
+    console.error('Error fetching user profile or stats:', error);
     return {
       success: false,
-      message: 'Failed to fetch user profile',
+      message: error.message || 'Failed to fetch user profile and statistics',
     };
   }
 }
+
 
 
 

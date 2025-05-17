@@ -3,6 +3,7 @@
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import PopupMessage from '../messages/RegMsg/RegMagbox';
 
 export default function Signup() {
   const router = useRouter();
@@ -10,6 +11,7 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showToggleIcon, setShowToggleIcon] = useState(false);
   const [passwordValid, setPasswordValid] = useState(true);
+  const [popup, setPopup] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -44,33 +46,36 @@ export default function Signup() {
     e.preventDefault();
 
     if (!formData.agree) {
-      alert('You must agree to the terms.');
+      setPopup({ message: 'You must agree to the terms.', type: 'error' });
       return;
     }
 
     if (!passwordValid) {
-      alert('Password must be at least 8 characters long and include a letter, number, and special symbol.');
+      setPopup({ message: 'Password must be at least 8 characters long and include a letter, number, and special character.', type: 'error' });
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/super-admin/Register', formData);
-      console.log('Success:', response.data);
+      const response = await axios.post('http://localhost:5000/api/vi/register', formData);
+      const data = response.data;
 
-      if (response.data.register_sate === true) {
-        router.push('/');
+      if (data.register_sate === true) {
+        setPopup({ message: data.message || 'Registration successful!', type: 'success' });
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
+      } else {
+        setPopup({ message: data.message || 'Registration failed. Please try again.', type: 'error' });
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error('Axios error:', error.response?.data || error.message);
-        if (error.response?.data.register_sate === true) {
-          router.push('/');
-        }
+        const errorMsg =
+          error.response?.data?.message || 'Something went wrong during registration.';
+        setPopup({ message: errorMsg, type: 'error' });
       } else {
-        console.error('Unexpected error:', error);
-        alert('An unexpected error occurred.');
+        setPopup({ message: `Unknown error: ${String(error)}`, type: 'error' });
       }
     } finally {
       setLoading(false);
@@ -82,9 +87,9 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/images/bg21.jpg')] bg-cover bg-center px-4 sm:px-8 md:px-12 py-10">
       <div className="bg-black rounded-2xl shadow-lg p-8 sm:p-10 w-full max-w-150 text-white">
-        <h1 className="text-4xl font-bold text-teal-600 mb-2">Hi!, Welcome to Inquoto</h1>
+        <h1 className="text-4xl font-bold text-teal-600 mb-2">Hi!, Welcome to QuantifyPro</h1>
         <h1 className="text-3xl font-bold mb-2">Create Your Account</h1>
-        <p className="text-gray-400 mb-5 text-sm">Create an account to get started with Inquoto.</p>
+        <p className="text-gray-400 mb-5 text-sm">Create an account to get started with QuantifyPro.</p>
 
         <form className="space-y-5 mt-10" onSubmit={handleSubmit}>
           <div>
@@ -92,6 +97,7 @@ export default function Signup() {
             <input
               name="name"
               type="text"
+              required
               value={formData.name}
               onChange={handleChange}
               placeholder="Your Name"
@@ -104,6 +110,7 @@ export default function Signup() {
             <input
               name="email"
               type="email"
+              required
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
@@ -119,6 +126,7 @@ export default function Signup() {
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
+                required
                 placeholder="Create your password"
                 className={`w-full px-4 py-2 rounded-md bg-transparent border ${
                   passwordValid ? 'border-gray-600' : 'border-red-500'
@@ -173,7 +181,7 @@ export default function Signup() {
           <button
             type="submit"
             disabled={!isFormReady || loading}
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-md font-semibold transition flex items-center justify-center gap-2 disabled"
+            className="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-md font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading && (
               <svg
@@ -200,6 +208,14 @@ export default function Signup() {
             {loading ? "Creating..." : "Create Account"}
           </button>
         </form>
+
+        {popup && (
+          <PopupMessage
+            message={popup.message}
+            type={popup.type}
+            onClose={() => setPopup(null)}
+          />
+        )}
       </div>
     </div>
   );

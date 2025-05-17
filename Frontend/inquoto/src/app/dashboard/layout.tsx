@@ -1,6 +1,9 @@
-// app/dashboard/layout.tsx
-import React from 'react';
-import Sidebar from '@/app/components/Sidebar'; // adjust the path if needed
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Sidebar from '@/app/components/Sidebar';
+import { SearchProvider } from "@/app/context/SearchContext";
 import Topbar from '../components/Topbar';
 
 export default function DashboardLayout({
@@ -8,25 +11,41 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token'); 
+
+      if (!token) {
+        router.push('/errors');
+      } else {
+        setAuthorized(true); 
+      }
+
+      setLoading(false); 
+    }
+  }, [router]);
+
+  if (loading) return <div>Loading...</div>; 
+  if (!authorized) return null; 
+
   return (
-
-      
-    <div className="flex h-screen">
-      {/* Sidebar (fixed on the left) */}
-      <div className="w-64 fixed top-0 left-0 bottom-0 bg-white shadow-md z-40">
-        <Sidebar />
+    <SearchProvider>
+        <div className="flex h-screen">
+        <div className="w-64 fixed top-0 left-0 bottom-0 bg-white shadow-md z-40">
+          <Sidebar />
+        </div>
+        <div className="flex-1 flex flex-col ml-64">
+          <Topbar />
+          <main className="flex-1 text-black overflow-y-auto pt-0 px-10 bg-gray-100">
+            {children}
+          </main>
+        </div>
       </div>
-
-      {/* Main content area with fixed Topbar and scrollable page content */}
-      <div className="flex-1 flex flex-col ml-64">
-        {/* Topbar (fixed on the top) */}
-        <Topbar />
-        
-        {/* Scrollable page content */}
-        <main className="flex-1 text-black overflow-y-auto pt-0 px-6 bg-gray-100">
-          {children}
-        </main>
-      </div>
-    </div>
+    </SearchProvider>
+    
   );
 }

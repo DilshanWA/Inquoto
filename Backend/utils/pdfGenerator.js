@@ -26,12 +26,19 @@ async function generatePDF(data) {
   );
   const headerImage = await pdfDoc.embedPng(headerImageBytes);
   page.drawImage(headerImage, {
-    x: 400,
-    y: 780,
-    width: 150,
+    x: 500,
+    y: 770,
+    width: 50,
     height: 40,
   });
 
+
+  
+drawText("Date:", 460, 582 + 150, 10, true);
+drawText(data.date, 460 + 60, 582 + 150);
+
+drawText("Valid Until:", 460, 582 + 130, 10, true);
+drawText(data.validity, 460 + 60, 582 + 130);
 
 
 
@@ -52,11 +59,16 @@ async function generatePDF(data) {
 
   const items = data.items || [];
   const totalAmount = String(data.total ?? "0.00");
+
+  drawText(data.docType, 595/2, startY + 190, 20, true);
   
-  drawText("Estimate:", startX, startY + 150, 10, true);
-  drawText(data.companyName, startX, startY + 130, 10);
-  drawText(data.companyAddress, startX, startY + 110, 10);
-  
+ drawText("Date:", 460, 582 + 150, 10, true);
+drawText(data.date, 460 + 60, 582 + 150);
+
+
+drawText("Valid Until:", 460, 582 + 130, 10, true);
+drawText(data.validity, 460 + 60, 582 + 130);
+
 
   
   drawText("Estimate for:", startX, startY + 80, 10, true);

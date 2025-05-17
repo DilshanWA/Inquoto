@@ -28,11 +28,11 @@ const Sidebar = () => {
     <div className="bg-black text-white h-screen w-70 flex flex-col justify-between">
       {/* Top: Logo and Nav */}
       <div>
-        <div className="flex flex-col items-center px-4 mt-10">
+        <div className="flex flex-col items-left px-4 mt-10">
           <img src="/images/systemLogo.png" alt="Logo" className="w-40 h-auto" />
         </div>
 
-        <nav className="mt-10">
+        <nav className="mt-20">
           <ul className="space-y-4 px-4 text-xl">
             {navItems.map(({ name, href }) => (
               <li key={href}>

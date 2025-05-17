@@ -28,8 +28,8 @@ const login = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    console.log(req.uid);
-    const profile = await getUserProfile(req.uid); 
+    console.log(req.body);
+    const profile = await getUserProfile(req.body.userID); 
     res.status(200).json(profile);
   } catch (error) {
     res.status(500).json({ message: error.message });

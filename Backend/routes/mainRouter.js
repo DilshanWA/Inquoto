@@ -45,10 +45,12 @@ router.post("/create-invoices",authMiddleware,invoiceController.create);
 router.delete("/delete-invoices",authMiddleware,invoiceController.remove);
 //  Update an invoice
 router.put("/update-invoices",authMiddleware,invoiceController.update);
+//update state
+router.put("/invoices-state",authMiddleware,invoiceController.State);
 
 
 //  Generate invoice PDF
-router.post("/create-invoice-pdf",invoiceController.genPDF);
+router.post("/create-pdf",authMiddleware,invoiceController.genPDF);
 
 
 

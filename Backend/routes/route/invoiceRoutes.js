@@ -5,6 +5,7 @@ const {
   getAllInvoices,
   deleteInvoice,
   updateInvoice,
+  updateInvoiceState
 } = require("../../controllers/invoiceController");
 
 const { generatePDF } = require("../../utils/pdfGenerator");
@@ -45,13 +46,27 @@ const update = async (req, res) => {
   }
 };
 
+
+const State = async (req, res) => {
+  try {
+    const result = await updateInvoiceState( req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
 const  genPDF = async (req, res) => {
   try {
     const pdfBuffer = await generatePDF(req.body);
+    const fileId = req.body.invoiceID || req.body.quotationID || "document";
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=invoice_${Date.now()}.pdf`
+      `attachment; filename=${fileId}.pdf`
     );
     res.send(pdfBuffer);
   } catch (error) {
@@ -65,5 +80,7 @@ module.exports = {
   create,
   remove,
   update,
+   State,
   genPDF,
+ 
 };

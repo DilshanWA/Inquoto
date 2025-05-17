@@ -1,19 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import UserForm from '@/app/components/addUser';  // Import the CreateUser component
+import UserForm from '@/app/components/addUser';
 import UserTable from '@/app/components/usersTable';
 
 export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
-  const router = useRouter(); // ✅ Call useRouter at the top
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [loading, setLoading] = useState(true); // ✅ loading state
+  const router = useRouter();
 
   const closeModal = () => setShowModal(false);
+  const handleRefreshTable = () => setRefreshKey(prev => prev + 1);
 
-  const handleNavigate = () => {
-    router.push('/Create_user'); // ✅ Navigate using a string route
-  };
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    if (role !== 'super_admin') {
+      localStorage.removeItem('role');
+      router.push('/');
+    } else {
+      setLoading(false); // ✅ only show page when authorized
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen">
@@ -30,13 +47,11 @@ export default function AdminPage() {
 
         {showModal && (
           <div>
-            <UserForm handleCloseForm={closeModal} /> 
+            <UserForm handleCloseForm={closeModal} refreshTable={handleRefreshTable} />
           </div>
         )}
 
-        <UserTable/>
-
-
+        <UserTable refreshKey={refreshKey} />
       </div>
     </div>
   );

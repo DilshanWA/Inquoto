@@ -12,12 +12,12 @@ async function createInvoice(invoiceData) {
   try {
     // 1. Generate unique invoice ID: YYYYMMDDHHMM
     const now = new Date();
-    const invoiceId = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+    const invoiceId = `INV ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
     // 2. Create the full invoice object with all expected fields
     const fullInvoice = {
       invoiceId,
-      createdAt: now,
+      createdAt: now.toISOString(),
       customerName: invoiceData.customerName,
       customerAddress: invoiceData.customerAddress || '',
       date: invoiceData.date || '',
@@ -124,6 +124,51 @@ async function updateInvoice(Data) {
 }
 
 
+async function updateInvoiceState(Data) {
+  if (!Data.invoiceId || !Data.updatedData?.state || !Data.userEmail) {
+    throw new Error("Invoice ID, new state, and user email are required");
+  }
+
+  const role = Data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+
+  try {
+    // 1. Reference the invoice document
+    const invoiceRef = db.collection("invoices").doc(Data.invoiceId);
+    const invoiceDoc = await invoiceRef.get();
+
+    if (!invoiceDoc.exists) {
+      return { success: false, message: "Invoice not found" };
+    }
+
+    // 2. Only super admin can update the state directly
+    if (role !== "super_admin") {
+      return {
+        success: false,
+        message: "Permission denied: only super admin can update invoice state",
+      };
+    }
+
+    // 3. Update only the 'state' field
+    await invoiceRef.update({
+      status: Data.updatedData.state,
+      updatedAt: new Date().toISOString(),
+      updatedBy: Data.userEmail,
+    });
+
+    return {
+      success: true,
+      message: `Invoice state updated to "${Data.updatedData.state}"`,
+      invoiceId: Data.invoiceId,
+    };
+
+  } catch (error) {
+    console.error("Error updating invoice state:", error);
+    throw new Error("Failed to update invoice state");
+  }
+}
+
+
+
 // Delete invoice by ID
 async function deleteInvoice(data) {
   if (!data.invoiceId && !data.userEmail) throw new Error("Invoice ID Or Email is Miss");
@@ -157,4 +202,4 @@ async function deleteInvoice(data) {
 
 
 
-module.exports = {getAllInvoices,createInvoice ,deleteInvoice,updateInvoice};
+module.exports = {getAllInvoices,createInvoice ,deleteInvoice,updateInvoice,updateInvoiceState};
