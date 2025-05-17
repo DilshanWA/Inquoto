@@ -204,7 +204,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         />
       )}
       <div className="fixed">
-        <div className="relative w-full max-w-5xl transform overflow-hidden bg-white p-6 rounded-lg shadow-xl">
+        <div className="relative w-full w-5xl transform overflow-hidden bg-white p-6 rounded-lg shadow-xl">
           <button
             onClick={handleCloseForm}
             className="absolute top-4 right-4 z-10 rounded-md bg-gray-100 p-2 text-gray-600 hover:text-gray-800"
@@ -215,7 +215,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </svg>
           </button>
 
-          <div className="max-h-[70vh] overflow-y-auto p-4">
+          <div className="max-h-[75vh] overflow-y-auto p-4">
             <form onSubmit={handleSubmit} className="space-y-4">
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -225,7 +225,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3 text-sm"
                     placeholder="Customer name"
                     disabled={isSubmitting}
                   />
@@ -236,7 +236,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3 text-sm"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -246,7 +246,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     type="text"
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3 text-sm"
                     placeholder="Address"
                     disabled={isSubmitting}
                   />
@@ -257,7 +257,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     type="date"
                     value={validity}
                     onChange={(e) => setValidity(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md py-3 px-3 text-sm"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -266,12 +266,13 @@ const handleSubmit = async (e: React.FormEvent) => {
               <div className="hidden sm:grid grid-cols-12 bg-gray-200 font-medium text-gray-700 px-3 py-2 rounded text-xs">
                 <div className="col-span-1 text-center">No</div>
                 <div className="col-span-5">Description</div>
+                <div className="col-span-2 text-center">Unit</div>
                 <div className="col-span-2 text-center">Quantity</div>
                 <div className="col-span-2 text-right">Unit Price</div>
                 <div className="col-span-2 text-right">Total</div>
               </div>
 
-                        {items.map((item, index) => (
+            {items.map((item, index) => (
             <div
               key={index}
               className="grid grid-cols-12 items-center gap-2 border-b border-gray-200 py-2 text-sm"
@@ -283,17 +284,18 @@ const handleSubmit = async (e: React.FormEvent) => {
                   value={item.description}
                   onChange={(e) => handleChangeItem(index, 'description', e.target.value)}
                   placeholder="Description"
-                  className="w-full border border-gray-300 rounded-md py-1 px-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md py-3 px-2 text-sm"
                   disabled={isSubmitting}
                 />
               </div>
+            
               <div className="col-span-2">
                 <input
                   type="number"
                   min="0"
                   value={item.quantity}
                   onChange={(e) => handleChangeItem(index, 'quantity', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md py-1 px-2 text-sm text-center"
+                  className="w-full border border-gray-300 rounded-md py-3 px-2 text-sm text-center"
                   disabled={isSubmitting}
                 />
               </div>
@@ -304,7 +306,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   step="0.01"
                   value={item.unitPrice}
                   onChange={(e) => handleChangeItem(index, 'unitPrice', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md py-1 px-2 text-sm text-right"
+                  className="w-full border border-gray-300 rounded-md py-3 px-2 text-sm text-right"
                   disabled={isSubmitting}
                 />
               </div>
@@ -332,7 +334,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             disabled={isSubmitting}
             className="mt-2 rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
           >
-            Add Item
+            Add Row+
           </button>
 
           <div className="text-right mt-4 font-bold text-lg">
@@ -365,7 +367,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+              className="rounded bg-teal-600 px-5 py-3 cursor-pointer text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
             >
               {isSubmitting ? 'Submitting...' : isEditMode ? 'Update' : `Create ${type} `}
             </button>
