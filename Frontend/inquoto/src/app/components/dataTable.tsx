@@ -300,10 +300,10 @@ const handleDelete = async (doc: Document) => {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {highlightMatch(doc.documentId || doc.id || '', searchQuery)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-gray-500 uppercase">
                     {highlightMatch(doc.client || doc.customerName || '', searchQuery)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{doc.total ?? doc.amount ?? '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">Rs:{doc.total ?? doc.amount ?? '-'}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {userRole === 'super_admin' ? (
                       <select

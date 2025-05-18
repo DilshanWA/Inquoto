@@ -5,7 +5,7 @@ import { NotificationProvider } from "@/app/context/NotificationContext";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="text-black ">
+      <body className="text-black bg-white"> 
         <NotificationProvider>
            {children}
         </NotificationProvider>

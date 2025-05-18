@@ -266,7 +266,6 @@ const handleSubmit = async (e: React.FormEvent) => {
               <div className="hidden sm:grid grid-cols-12 bg-gray-200 font-medium text-gray-700 px-3 py-2 rounded text-xs">
                 <div className="col-span-1 text-center">No</div>
                 <div className="col-span-5">Description</div>
-                <div className="col-span-2 text-center">Unit</div>
                 <div className="col-span-2 text-center">Quantity</div>
                 <div className="col-span-2 text-right">Unit Price</div>
                 <div className="col-span-2 text-right">Total</div>
@@ -311,7 +310,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 />
               </div>
               <div className="col-span-2 text-right font-semibold">
-                {item.total.toFixed(2)}
+                Rs:{item.total.toFixed(2)}
               </div>
               <div className="col-span-12 text-right mt-1">
                 {items.length > 1 && (
@@ -338,7 +337,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </button>
 
           <div className="text-right mt-4 font-bold text-lg">
-            Total: {getTotalInvoice().toFixed(2)}
+            Total: Rs:{getTotalInvoice().toFixed(2)}
           </div>
 
           <div>

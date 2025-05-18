@@ -34,7 +34,7 @@ export default function DashboardLayout({
 
   return (
     <SearchProvider>
-        <div className="flex h-screen bg-black">
+        <div className="flex bg-white h-screen">
         <div className="w-64 fixed top-0 left-0 bottom-0 bg-white shadow-md z-40">
           <Sidebar />
         </div>
