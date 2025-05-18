@@ -64,6 +64,8 @@ drawText(data.date, 460 + 60, 582 + 130);
 drawText("Valid Until:", 460, 582 + 110, 10, true);
 drawText(data.validity, 460 + 60, 572 + 120);
 
+drawText(data.invoiceId, startX, startY + 170, 10, true);
+
  drawText("Estimate for:", startX, startY + 140, 10, true);
  drawText(data.customerName, startX, startY + 115, 10);
  drawText(data.customerAddress, startX, startY + 100, 10);
