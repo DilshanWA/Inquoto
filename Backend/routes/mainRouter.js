@@ -15,7 +15,7 @@ router.post("/register", userController.register);
 router.post("/login", userController.login);
 
 // Optional: protected profile route
-router.get("/profile", authMiddleware, userController.getProfile);
+router.get("/dashboard", authMiddleware, userController.getProfile);
 
 //  Get super admin dashboard info
 router.get("/admin-details",authMiddleware,userController.getAdminDashboard);

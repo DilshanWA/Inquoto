@@ -63,52 +63,49 @@ async function createQuotation(quotationData) {
 
   
   async function updateQuotation(updatedData) {
-    if (!updatedData || !updatedData.quotationId) {
-      throw new Error("Quotation ID and updated data are required");
-    }
-  
-    const role = updatedData.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
-  
-    try {
-      const oldRef = db.collection("quotations").doc(updatedData.quotationId);
-      const oldDoc = await oldRef.get();
-  
-      if (!oldDoc.exists) {
-        return { success: false, message: "Original quotation not found" };
-      }
-  
-      const oldData = oldDoc.data();
-  
-      // Check permission for admins (not super_admin)
-      if (role !== "super_admin" && oldData.customerEmail !==updatedData.userEmail) {
-        return { success: false, message: "Permission denied. You can only update your own quotations." };
-      }
-  
-      const now = new Date();
-      const newQuotationId = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-  
-      // Create new quotation as updated version
-      const updatedQuotation = {
-        ...oldData,
-        ...updatedData,
-        quotationId: newQuotationId,
-        updatedAt: now.toISOString(),
-        originalQuotationId: updatedData.quotationId,
-        updatedBy: updatedData.userEmail,
-      };
-  
-      await db.collection("quotation_updates").doc(newQuotationId).set(updatedQuotation);
-  
-      return {
-        success: true,
-        message: "Quotation updated successfully and saved as new record",
-        newQuotationId,
-      };
-    } catch (error) {
-      console.error("Error updating quotation:", error);
-      throw new Error("Failed to update quotation");
-    }
+  if (!updatedData || !updatedData.quotationId) {
+    throw new Error("Quotation ID and updated data are required");
   }
+
+  const role = updatedData.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+
+  try {
+    const ref = db.collection("quotations").doc(updatedData.quotationId);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return { success: false, message: "Original quotation not found" };
+    }
+
+    const oldData = doc.data();
+
+    // Check permission (admins can only update their own quotations)
+    if (role !== "super_admin" && oldData.customerEmail !== updatedData.userEmail) {
+      return { success: false, message: "Permission denied. You can only update your own quotations." };
+    }
+
+    // Create the update object by removing non-updatable fields
+    const updateFields = { ...updatedData };
+    delete updateFields.quotationId;
+    delete updateFields.userEmail;
+
+    // Add updated metadata
+    updateFields.updatedAt = new Date().toISOString();
+    updateFields.updatedBy = updatedData.userEmail;
+
+    await ref.update(updateFields);
+
+    return {
+      success: true,
+      message: "Quotation updated successfully",
+      quotationId: updatedData.quotationId,
+    };
+
+  } catch (error) {
+    console.error("Error updating quotation:", error);
+    throw new Error("Failed to update quotation");
+  }
+}
 
   
 

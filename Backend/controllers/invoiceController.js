@@ -72,56 +72,50 @@ async function getAllInvoices() {
 }
 
 // Update invoice by creating a new one with updated data
-async function updateInvoice(Data) {
-  if (!Data.invoiceId || !Data.updatedData || !Data.userEmail) {
+async function updateInvoice(data) {
+  if (!data || !data.invoiceId || !data.updatedData || !data.userEmail) {
     throw new Error("Invoice ID, updated data, and user email are required");
   }
 
-  const role = Data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+  const role = data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
 
   try {
-    // 1. Get the original invoice
-    const oldInvoiceRef = db.collection("invoices").doc(Data.invoiceId);
-    const oldInvoiceDoc = await oldInvoiceRef.get();
+    // 1. Reference the existing invoice
+    const invoiceRef = db.collection("invoices").doc(data.invoiceId);
+    const invoiceDoc = await invoiceRef.get();
 
-    if (!oldInvoiceDoc.exists) {
-      return { success: false, message: "Original invoice not found" };
+    if (!invoiceDoc.exists) {
+      return { success: false, message: "Invoice not found" };
     }
 
-    const oldData = oldInvoiceDoc.data();
+    const invoiceData = invoiceDoc.data();
 
-    // 2. Check permission
-    if (role !== "super_admin" && oldData.userID !== userEmail) {
-      return { success: false, message: "Permission denied: you can only update your own invoices" };
+    // 2. Permission check
+    if (role !== "super_admin" && invoiceData.userID !== data.userEmail) {
+      return { success: false, message: "Permission denied: You can only update your own invoices." };
     }
 
-    // 3. Generate new invoice ID
-    const now = new Date();
-    const newInvoiceId = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-
-    // 4. Prepare updated invoice
-    const updatedInvoice = {
-      ...oldData,
-      ...Data.updatedData,
-      invoiceId: newInvoiceId,
-      updatedAt: now.toISOString(),
-      updatedBy: Data.userEmail,
-      originalInvoiceId: Data.invoiceId, // Track original invoice
+    // 3. Update fields
+    const updatedFields = {
+      ...data.updatedData,
+      updatedAt: new Date().toISOString(),
+      updatedBy: data.userEmail,
     };
 
-    // 5. Save as a new document
-    await db.collection("invoices").doc(newInvoiceId).set(updatedInvoice);
+    // 4. Update existing document (no new document created)
+    await invoiceRef.update(updatedFields);
 
     return {
       success: true,
-      message: "Invoice updated successfully and saved as a new record",
-      newInvoiceId,
+      message: "Invoice updated successfully",
+      invoiceId: data.invoiceId,
     };
   } catch (error) {
     console.error("Error updating invoice:", error);
     throw new Error("Failed to update invoice");
   }
 }
+
 
 
 
