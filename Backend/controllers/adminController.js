@@ -30,44 +30,51 @@ const transporter = nodemailer.createTransport({
 //Get profile data
 
 
-async function getUserProfile(data) {
+async function getUserProfile(userId) {
   try {
-    // 🚫 Check if user ID is missing
-    if (!data || typeof data !== 'string') {
+    if (!userId || typeof userId !== 'string') {
       throw new Error('Invalid user ID');
     }
 
-    // 1. Get user profile by ID
-    const userRef = db.collection('users').doc(data);
+    // 1. Get user profile
+    const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
-
     if (!userDoc.exists) {
       throw new Error('User not found');
     }
-
     const userData = userDoc.data();
 
-    // 2. Total Users Count
-    const usersSnapshot = await db.collection('users').get();
+    // 2. Basic counts
+    const [usersSnapshot, pendingUsersSnapshot] = await Promise.all([
+      db.collection('users').get(),
+      db.collection('users').where('register_state', '==', 'pending').get()
+    ]);
     const totalUsers = usersSnapshot.size;
+    const pendingApprovals = pendingUsersSnapshot.size;
 
-    // 3. Pending Approvals Count
-    const pendingSnapshot = await db.collection('users')
-      .where('register_state', '==', 'pending')
-      .get();
-    const pendingApprovals = pendingSnapshot.size;
+    // 3. Quotations & Invoices for this user
+    const [
+      allQuotations, allInvoices,
+      pendingQuotations, pendingInvoices,
+      completeQuotations, completeInvoices,
+      approvedQuotations, approvedInvoices,
+      rejectedQuotations, rejectedInvoices
+    ] = await Promise.all([
+      db.collection('quotations').where('userID', '==', userId).get(),
+      db.collection('invoices').where('userID', '==', userId).get(),
 
-    // 4. Quotations for this user
-    const quotationsSnapshot = await db.collection('quotations')
-      .where('userID', '==', data)
-      .get();
-    const totalQuotations = quotationsSnapshot.size;
+      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'pending').get(),
+      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'pending').get(),
 
-    // 5. Invoices for this user
-    const invoicesSnapshot = await db.collection('invoices')
-      .where('userID', '==', data)
-      .get();
-    const totalInvoices = invoicesSnapshot.size;
+      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'complete').get(),
+      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'complete').get(),
+
+      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'approved').get(),
+      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'approved').get(),
+
+      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'rejected').get(),
+      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'rejected').get()
+    ]);
 
     return {
       success: true,
@@ -81,11 +88,19 @@ async function getUserProfile(data) {
       stats: {
         totalUsers,
         pendingApprovals,
-        totalQuotations,
-        totalInvoices
+        totalQuotations: allQuotations.size,
+        totalInvoices: allInvoices.size,
+        pendingQuotations: pendingQuotations.size,
+        pendingInvoices: pendingInvoices.size,
+        completeQuotations: completeQuotations.size,
+        completeInvoices: completeInvoices.size,
+        approvedQuotations: approvedQuotations.size,
+        approvedInvoices: approvedInvoices.size,
+        rejectedQuotations: rejectedQuotations.size,
+        rejectedInvoices: rejectedInvoices.size,
+        totalRejected: rejectedQuotations.size + rejectedInvoices.size,
       }
     };
-
   } catch (error) {
     console.error('Error fetching user profile or stats:', error);
     return {
@@ -94,6 +109,7 @@ async function getUserProfile(data) {
     };
   }
 }
+
 
 
 

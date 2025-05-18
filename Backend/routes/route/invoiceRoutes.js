@@ -30,7 +30,9 @@ const create = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const result = await deleteInvoice(req.body);
+    const invoiceId = req.params.id;
+    const userEmail = req.headers['user-email'];
+    const result = await deleteInvoice(invoiceId,userEmail);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });

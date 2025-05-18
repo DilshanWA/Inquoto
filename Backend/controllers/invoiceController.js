@@ -122,14 +122,14 @@ async function updateInvoice(data) {
 
 
 // Delete invoice by ID
-async function deleteInvoice(data) {
-  if (!data.invoiceId && !data.userEmail) throw new Error("Invoice ID Or Email is Miss");
+async function deleteInvoice(invoiceId ,userEmail) {
+  if (!invoiceId && !userEmail) throw new Error("Invoice ID Or Email is Miss");
 
 
-  const role = data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+  const role = userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
 
   try {
-    const invoiceRef = db.collection("invoices").doc(data.invoiceId);
+    const invoiceRef = db.collection("invoices").doc(invoiceId);
     const doc = await invoiceRef.get();
 
     if (!doc.exists) {
@@ -139,7 +139,7 @@ async function deleteInvoice(data) {
     const invoiceData = doc.data();
 
     // 🔒 Admins can only delete their own invoices
-    if (role !== "super_admin" && invoiceData.userEmail !== data.userEmail) {
+    if (role !== "super_admin" && invoiceData.userEmail !== userEmail) {
       return { success: false, message: "Permission denied: you can only delete your own invoices" };
     }
 
