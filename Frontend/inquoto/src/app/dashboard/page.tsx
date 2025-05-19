@@ -115,8 +115,28 @@ const Dashboard = () => {
       ]
     : [];
 
-  if (loading) return <p>Loading dashboard data...</p>;
-  if (error) return <p className="text-red-500">Error: {error}</p>;
+ if (loading) {
+  return (
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
+        <p className="text-gray-600 text-lg font-medium">Loading your dashboard...</p>
+      </div>
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="text-red-500 text-4xl">⚠️</div>
+        <p className="text-red-600 text-lg font-semibold">Oops! Something went wrong.</p>
+        <p className="text-gray-500">{error}</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="p-8">

@@ -157,7 +157,7 @@ const GenPdf = async (doc: Document) => {
 
       const payload = {
         ...doc,
-        docType: type,
+        docType: (type || '').toUpperCase()
       };
 
       const response = await fetch(url, {
