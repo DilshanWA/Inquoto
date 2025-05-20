@@ -54,6 +54,12 @@ async function generatePDF(data) {
   drawText(data.validity, 460, 700);
   drawText(`${data.docType} ID:`, 400, 680, 10, true);
   drawText(data.id, 460, 680);
+    if(data.QuotationsID){
+       drawText(`QuotationsID:`, 400, 660, 10, true);
+       drawText(data.QuotationsID, 460, 680);
+  
+    }
+
 
   // === 4. Table Layout ===
   const startX = 30;

@@ -12,11 +12,7 @@ async function createInvoice(invoiceData) {
   try {
     // 1. Generate unique invoice ID: YYYYMMDDHHMM
     const now = new Date();
-<<<<<<< HEAD
-    const invoiceId = `INV ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-=======
     const invoiceId = `INV${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
 
     // 2. Create the full invoice object with all expected fields
     const fullInvoice = {

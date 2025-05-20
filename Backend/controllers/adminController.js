@@ -21,21 +21,6 @@ const transporter = nodemailer.createTransport({
  * @param {string} email 
  */
 
-<<<<<<< HEAD
-
-
-
-//Get profile data
-
-
-async function getUserProfile(userId) {
-  try {
-    if (!userId || typeof userId !== 'string') {
-      throw new Error('Invalid user ID');
-    }
-
-    // 1. Get user profile
-=======
 async function getUserProfile(userId) {
   try {
     if (!userId || typeof userId !== 'string') {
@@ -43,7 +28,6 @@ async function getUserProfile(userId) {
     }
 
     // === 1. Get user profile ===
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
     if (!userDoc.exists) {
@@ -51,44 +35,11 @@ async function getUserProfile(userId) {
     }
     const userData = userDoc.data();
 
-<<<<<<< HEAD
-    // 2. Basic counts
-=======
     // === 2. Basic counts ===
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
     const [usersSnapshot, pendingUsersSnapshot] = await Promise.all([
       db.collection('users').get(),
       db.collection('users').where('register_state', '==', 'pending').get()
     ]);
-<<<<<<< HEAD
-    const totalUsers = usersSnapshot.size;
-    const pendingApprovals = pendingUsersSnapshot.size;
-
-    // 3. Quotations & Invoices for this user
-    const [
-      allQuotations, allInvoices,
-      pendingQuotations, pendingInvoices,
-      completeQuotations, completeInvoices,
-      approvedQuotations, approvedInvoices,
-      rejectedQuotations, rejectedInvoices
-    ] = await Promise.all([
-      db.collection('quotations').where('userID', '==', userId).get(),
-      db.collection('invoices').where('userID', '==', userId).get(),
-
-      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'pending').get(),
-      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'pending').get(),
-
-      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'complete').get(),
-      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'complete').get(),
-
-      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'approved').get(),
-      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'approved').get(),
-
-      db.collection('quotations').where('userID', '==', userId).where('status', '==', 'rejected').get(),
-      db.collection('invoices').where('userID', '==', userId).where('status', '==', 'rejected').get()
-    ]);
-
-=======
 
     const totalUsers = usersSnapshot.size;
     const pendingApprovals = pendingUsersSnapshot.size;
@@ -136,7 +87,6 @@ async function getUserProfile(userId) {
     const totalGlobalQuotations = results[18];
     const totalGlobalInvoices = results[19];
 
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
     return {
       success: true,
       profile: {
@@ -147,21 +97,6 @@ async function getUserProfile(userId) {
         createdAt: userData.createdAt,
       },
       stats: {
-<<<<<<< HEAD
-        totalUsers,
-        pendingApprovals,
-        totalQuotations: allQuotations.size,
-        totalInvoices: allInvoices.size,
-        pendingQuotations: pendingQuotations.size,
-        pendingInvoices: pendingInvoices.size,
-        completeQuotations: completeQuotations.size,
-        completeInvoices: completeInvoices.size,
-        approvedQuotations: approvedQuotations.size,
-        approvedInvoices: approvedInvoices.size,
-        rejectedQuotations: rejectedQuotations.size,
-        rejectedInvoices: rejectedInvoices.size,
-        totalRejected: rejectedQuotations.size + rejectedInvoices.size,
-=======
         users: {
           total: totalUsers,
           pending: pendingApprovals,
@@ -190,7 +125,6 @@ async function getUserProfile(userId) {
           approvedInvoices: globalInvoices[2].size,
           rejectedInvoices: globalInvoices[3].size,
         }
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
       }
     };
   } catch (error) {
@@ -203,16 +137,6 @@ async function getUserProfile(userId) {
 }
 
 
-<<<<<<< HEAD
-
-
-
-
-
-
-
-=======
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
 async function getadminDetails() {
   try {
     const snapshot = await db.collection("Addusers").get();

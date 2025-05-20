@@ -243,28 +243,12 @@ const handleDelete = async (doc: Document) => {
   if (!window.confirm(`Are you sure you want to delete document "${doc.documentId || doc.id}"?`)) return;
 
   try {
-<<<<<<< HEAD
-    const url =
-      type === 'Quotation'
-        ? 'http://localhost:5000/api/vi/create-pdf'
-        : 'http://localhost:5000/api/vi/create-pdf';
-
-=======
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
     const token = localStorage.getItem('token');
     const userEmail = localStorage.getItem('email');
     const url = type === 'Quotation'
       ? `http://localhost:5000/api/vi/delete-quotations/${doc.quotationId}`
       : `http://localhost:5000/api/vi/delete-invoices/${doc.invoiceId}`;
 
-<<<<<<< HEAD
-    const payload = {
-      ...doc,
-      docType: type,
-    };
-    console.log(payload);
-=======
->>>>>>> 70016798a0f1c75ef84ca62e493a838c73841079
     const response = await fetch(url, {
       method: 'DELETE',
       headers: {
