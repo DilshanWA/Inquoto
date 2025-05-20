@@ -29,56 +29,67 @@ export default function Topbar() {
 
   return (
     <div className="flex justify-between items-center px-18 py-4 bg-white shadow">
-      <input
-        type="text"
-        placeholder="Search anything"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="text-black placeholder:text-gray-400 bg-gray-100 px-4 py-3 rounded w-1/2"
-      />
+  {/* Search Input with Icon */}
+  <div className="relative w-1/2">
+    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">
+       <img src="/images/search-icon.png" alt="" 
+       width={23}
+       color="gray"
+       height={20}  />
+    </span>
+    <input
+      type="text"
+      placeholder="Search anything"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      className="text-black placeholder:text-gray-400 bg-gray-100 pl-10 pr-4 py-3 rounded w-full"
+    />
+  </div>
 
-      <div className="flex items-center space-x-4 relative" ref={dropdownRef}>
-        {/* Bell Icon */}
-        <div
-          className="relative cursor-pointer text-xl"
-          onClick={() => setShowDropdown(!showDropdown)}
-        >
-          {notifications.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-              {notifications.length}
-            </span>
-          )}
-          🔔
-        </div>
-
-        {/* Notification Dropdown */}
-        {showDropdown && (
-          <div className="absolute top-12 right-10 w-72 bg-white shadow-lg rounded p-4 z-10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-semibold text-gray-700">Notifications</span>
-              <button
-                className="text-xs text-blue-500 hover:underline"
-                onClick={clearNotifications}
-              >
-                Clear All
-              </button>
-            </div>
-            {notifications.length === 0 ? (
-              <p className="text-sm text-gray-400">No new notifications</p>
-            ) : (
-              <ul className="space-y-2 max-h-48 overflow-y-auto">
-                {notifications.map((note, index) => (
-                  <li key={index} className="text-sm text-gray-700 bg-gray-100 rounded p-2">
-                    {note}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-
-        <ProfileDropdown />
-      </div>
+  {/* Notifications and Profile */}
+  <div className="flex items-center space-x-4 relative" ref={dropdownRef}>
+    {/* Bell Icon */}
+    <div
+      className="relative cursor-pointer text-xl"
+      onClick={() => setShowDropdown(!showDropdown)}
+    >
+      {notifications.length > 0 && (
+        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+          {notifications.length}
+        </span>
+      )}
+      🔔
     </div>
+
+    {/* Notification Dropdown */}
+    {showDropdown && (
+      <div className="absolute top-12 right-10 w-72 bg-white shadow-lg rounded p-4 z-10">
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-semibold text-gray-700">Notifications</span>
+          <button
+            className="text-xs text-blue-500 hover:underline"
+            onClick={clearNotifications}
+          >
+            Clear All
+          </button>
+        </div>
+        {notifications.length === 0 ? (
+          <p className="text-sm text-gray-400">No new notifications</p>
+        ) : (
+          <ul className="space-y-2 max-h-48 overflow-y-auto">
+            {notifications.map((note, index) => (
+              <li key={index} className="text-sm text-gray-700 bg-gray-100 rounded p-2">
+                {note}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )}
+
+    <ProfileDropdown />
+  </div>
+</div>
+
   );
 }

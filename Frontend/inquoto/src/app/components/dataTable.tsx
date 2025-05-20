@@ -240,9 +240,16 @@ const GenPdf = async (doc: Document) => {
 
   // New: Handle Delete
 const handleDelete = async (doc: Document) => {
-  if (!window.confirm(`Are you sure you want to delete document "${doc.documentId || doc.id}"?`)) return;
+   if (!window.confirm(`Are you sure you want to delete document "${doc.documentId || doc.id}"?`)) return;
 
-  try {
+  const currentUser = localStorage.getItem('uid');
+  const role = localStorage.getItem('role');
+    if (doc.userID !== currentUser && role !== 'super_admin') {
+      alert('You cannot delete a document that you did not create.');
+      return;
+    }
+
+    try {
     const token = localStorage.getItem('token');
     const userEmail = localStorage.getItem('email');
     const url = type === 'Quotation'

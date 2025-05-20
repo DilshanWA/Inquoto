@@ -52,7 +52,7 @@ async function generatePDF(data) {
   drawText(data.date, 460, 720);
   drawText("Valid Until:", 400, 700, 10, true);
   drawText(data.validity, 460, 700);
-  drawText(`${data.docType} ID:`, 400, 680, 10, true);
+  drawText(`${data.docType}ID:`, 400, 680, 10, true);
   drawText(data.id, 460, 680);
 
   // === 4. Table Layout ===
