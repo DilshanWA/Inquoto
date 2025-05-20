@@ -27,8 +27,18 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activePie, setActivePie] = useState<'Invoices' | 'Quotations'>('Invoices');
+  const [dateTime, setDateTime] = useState(new Date());
 
   const userID = localStorage.getItem('uid');
+  const userName = localStorage.getItem('name');
+
+    useEffect(() => {
+    const interval = setInterval(() => {
+      setDateTime(new Date());
+    }, 1000); // updates every second
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,13 +77,21 @@ const Dashboard = () => {
     ];
   };
 
-  const barChartData = data
-    ? ['Approved', 'Pending', 'Rejected', 'Completed'].map((status) => ({
-        name: status,
-        Invoices: data?.[`${status.toLowerCase()}Invoices`] || 0,
-        Quotations: data?.[`${status.toLowerCase()}Quotations`] || 0,
-      }))
-    : [];
+  const statusMap = [
+  { label: 'Approved', key: 'approved' },
+  { label: 'Pending', key: 'pending' },
+  { label: 'Rejected', key: 'rejected' },
+  { label: 'Completed', key: 'complete' }, // NOTE: not "completed"
+];
+
+const barChartData = data
+  ? statusMap.map(({ label, key }) => ({
+      name: label,
+      Invoices: data?.[`${key}Invoices`] || 0,
+      Quotations: data?.[`${key}Quotations`] || 0,
+    }))
+  : [];
+
 
   if (loading) {
     return (
@@ -93,7 +111,17 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard Overview</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+        <div>
+          <h1 className="text-xl font-normal text-gray-800">Hi, {userName} 👋 Welcome back!</h1>
+          <p className="text-sm text-gray-500">Here’s your dashboard overview</p>
+        </div>
+        <div className="text-right mt-2 md:mt-0">
+          <p className="text-sm text-gray-500">📅 {dateTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="text-sm text-gray-500">⏰ {dateTime.toLocaleTimeString()}</p>
+        </div>
+      </div>
+
 
           {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
