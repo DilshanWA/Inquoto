@@ -11,12 +11,12 @@ async function createQuotation(quotationData) {
   
     try {
       const now = new Date();
-      const quotationId = `QUO ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+      const quotationId = `QUO${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
   
       await db.collection("quotations").doc(quotationId).set({
         ...quotationData,
         quotationId: quotationId,
-        createdAt: now,
+        createdAt: now.toISOString(),
         status: quotationData.status || "pending",
       });
   
@@ -27,7 +27,7 @@ async function createQuotation(quotationData) {
           id: quotationId,
           ...quotationData,
           createdAt: now,
-          status: quotationData.status || "pending",
+          status: quotationData.status || "Pending",
         },
       };
     } catch (error) {
@@ -107,22 +107,67 @@ async function createQuotation(quotationData) {
   }
 }
 
+  async function updateQuotationState(Data) {
+  if (!Data.quotationId || !Data.newState || !Data.userEmail) {
+    throw new Error("Quotation ID, new state, and user email are required");
+  }
+
+  const role = Data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+
+  try {
+    const quotationRef = db.collection("quotations").doc(Data.quotationId);
+    const quotationeDoc = await quotationRef.get();
+
+    if (!quotationeDoc.exists) {
+      return { success: false, message: "Quotation not found" };
+    }
+
+    if (role !== "super_admin") {
+      return {
+        success: false,
+        message: "Permission denied: only super admin can update quotation state",
+      };
+    }
+
+    if (!Data.newState) {
+      throw new Error("State value is missing or undefined");
+    }
+
+    await quotationRef.update({
+      status: Data.newState,
+      updatedAt: new Date().toISOString(),
+      updatedBy: Data.userEmail,
+    });
+
+    return {
+      success: true,
+      message: `Quotation  state updated to "${Data.newState}"`,
+      quotationId: Data.quotationId,
+    };
+
+  } catch (error) {
+    console.error("Error updating quotation state:", error);
+    throw new Error("Failed to update quotation state");
+  }
+}
+
+
   
 
 
   
   
-  async function deleteQuotation(quotationId, userEmail) {
-  
-    if (!quotationId || !userEmail) {
+  async function deleteQuotation(data) {
+
+    if (!data.quotationId || !data.userEmail) {
       throw new Error("Quotation ID and user email are required");
     }
   
-    const role = userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+    const role = data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
   
     try {
-      const ref = db.collection("quotations").doc(quotationId);
-      const doc = await ref.get();
+      const quotationref = db.collection("quotations").doc(data.quotationId);
+      const doc = await quotationref.get();
   
       if (!doc.exists) {
         return { success: false, message: "Quotation not found" };
@@ -132,14 +177,14 @@ async function createQuotation(quotationData) {
   
       //  Permission check: only super_admins can delete any quotation Admins can only delete quotations they created
        
-      if (role !== "super_admin" && quotationData.userID !== userEmail) {
+      if (role !== "super_admin" && quotationData.userEmail !== data.userEmail) {
         return {
           success: false,
           message: "Permission denied: you can only delete your own quotations",
         };
       }
   
-      await ref.delete();
+      await quotationref.delete();
   
       return { success: true, message: "Quotation deleted successfully" };
     } catch (error) {
@@ -151,4 +196,7 @@ async function createQuotation(quotationData) {
   
 
 
-module.exports = {createQuotation,getAllQuotations,updateQuotation,deleteQuotation,};
+module.exports = {
+  createQuotation,getAllQuotations,
+  updateQuotation,deleteQuotation,
+  updateQuotationState};

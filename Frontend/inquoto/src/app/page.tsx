@@ -70,11 +70,11 @@ export default function LoginPage() {
 
 
   return (
-    <div className="h-screen flex items-center bg-green-100">
-      <div className="h-screen w-1/2 bg-white relative">
+    <div className="h-screen flex items-center">
+      <div className="h-screen w-1/2  relative">
         {/* Error Popup will only appear inside this box */}
 
-        <div className="flex flex-col items-center justify-center h-full">
+        <div className="flex flex-col items-center bg-white justify-center h-full">
           <div className="justify-center text-left mb-10 w-1/2">
             <h1 className="text-4xl font-bold text-gray-800">LOGIN </h1>
             <p className="text-black mt-2">Please enter your login credentials.</p>

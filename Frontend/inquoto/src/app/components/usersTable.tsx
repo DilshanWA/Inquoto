@@ -79,10 +79,10 @@ const deleteUser = async (id: string) => {
 
 
   return (
-    <div className="mt-10 w-full">
+    <div className="mt-10 ">
       <h2 className="text-3xl font-bold mb-6 text-gray-800">System Users</h2>
 
-      <div className="overflow-x-auto rounded-lg shadow-md border border-gray-200">
+      <div className="overflow-x-auto rounded-lg w-4xl shadow-md border border-gray-200">
         <table className="w-full text-sm text-left text-gray-700">
           <thead className="bg-gray-100 text-gray-700 uppercase tracking-wider">
             <tr>
@@ -120,7 +120,7 @@ const deleteUser = async (id: string) => {
                     </span>
                   </td>
                   <td className="px-6 py-4">{new Date(user.reg_date).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-5 py-4 text-center">
                     <button
                       onClick={() => deleteUser(user.id)}
                       disabled={deletingUserId === user.id}
