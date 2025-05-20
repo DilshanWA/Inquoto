@@ -1,11 +1,11 @@
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("../../../Service Account/serviceAccountKey.json");
+var serviceAccount = require("../serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://inventrydb-d9b53-default-rtdb.firebaseio.com"
+  databaseURL: "https://quantifypro-470f0-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
 const db = admin.firestore();

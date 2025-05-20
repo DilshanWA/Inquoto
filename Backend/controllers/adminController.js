@@ -7,9 +7,6 @@ require('dotenv').config();
 
 
 const LOGIN_REDIRECT_URL = "https://your-app.com/admin-login";
-//  Determine role
-
-
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -24,21 +21,71 @@ const transporter = nodemailer.createTransport({
  * @param {string} email 
  */
 
-
-
-
-//Get profile data
-
-async function getUserProfile(data) {
+async function getUserProfile(userId) {
   try {
-    const userRef = db.collection('users').doc(data);
-    const userDoc = await userRef.get();
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Invalid user ID');
+    }
 
+    // === 1. Get user profile ===
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
     if (!userDoc.exists) {
       throw new Error('User not found');
     }
-
     const userData = userDoc.data();
+
+    // === 2. Basic counts ===
+    const [usersSnapshot, pendingUsersSnapshot] = await Promise.all([
+      db.collection('users').get(),
+      db.collection('users').where('register_state', '==', 'pending').get()
+    ]);
+
+    const totalUsers = usersSnapshot.size;
+    const pendingApprovals = pendingUsersSnapshot.size;
+
+    // === 3. Quotation and Invoice stats (user-specific and global) ===
+    const statusList = ['Pending', 'Completed', 'Approved', 'Rejected'];
+
+    const userQuotationsPromises = statusList.map(status =>
+      db.collection('quotations').where('userID', '==', userId).where('status', '==', status).get()
+    );
+    const userInvoicesPromises = statusList.map(status =>
+      db.collection('invoices').where('userID', '==', userId).where('status', '==', status).get()
+    );
+    const allUserQuotations = db.collection('quotations').where('userID', '==', userId).get();
+    const allUserInvoices = db.collection('invoices').where('userID', '==', userId).get();
+
+    const globalQuotationsPromises = statusList.map(status =>
+      db.collection('quotations').where('status', '==', status).get()
+    );
+    const globalInvoicesPromises = statusList.map(status =>
+      db.collection('invoices').where('status', '==', status).get()
+    );
+    const allGlobalQuotations = db.collection('quotations').get();
+    const allGlobalInvoices = db.collection('invoices').get();
+
+    // Execute all promises and destructure results in order
+    const results = await Promise.all([
+      ...userQuotationsPromises,
+      ...userInvoicesPromises,
+      allUserQuotations,
+      allUserInvoices,
+      ...globalQuotationsPromises,
+      ...globalInvoicesPromises,
+      allGlobalQuotations,
+      allGlobalInvoices
+    ]);
+
+    // Manually assign results to variables
+    const userQuotations = results.slice(0, 4);
+    const userInvoices = results.slice(4, 8);
+    const allQuotationsSnapshot = results[8];
+    const allInvoicesSnapshot = results[9];
+    const globalQuotations = results.slice(10, 14);
+    const globalInvoices = results.slice(14, 18);
+    const totalGlobalQuotations = results[18];
+    const totalGlobalInvoices = results[19];
 
     return {
       success: true,
@@ -47,22 +94,47 @@ async function getUserProfile(data) {
         name: userData.name,
         register_state: userData.register_state,
         role: userData.role,
-        createdAt: userData.createdAt, 
+        createdAt: userData.createdAt,
       },
+      stats: {
+        users: {
+          total: totalUsers,
+          pending: pendingApprovals,
+        },
+        userData: {
+          totalQuotations: allQuotationsSnapshot.size,
+          totalInvoices: allInvoicesSnapshot.size,
+          pendingQuotations: userQuotations[0].size,
+          completeQuotations: userQuotations[1].size,
+          approvedQuotations: userQuotations[2].size,
+          rejectedQuotations: userQuotations[3].size,
+          pendingInvoices: userInvoices[0].size,
+          completeInvoices: userInvoices[1].size,
+          approvedInvoices: userInvoices[2].size,
+          rejectedInvoices: userInvoices[3].size,
+        },
+        globalData: {
+          totalQuotations: totalGlobalQuotations.size,
+          totalInvoices: totalGlobalInvoices.size,
+          pendingQuotations: globalQuotations[0].size,
+          completeQuotations: globalQuotations[1].size,
+          approvedQuotations: globalQuotations[2].size,
+          rejectedQuotations: globalQuotations[3].size,
+          pendingInvoices: globalInvoices[0].size,
+          completeInvoices: globalInvoices[1].size,
+          approvedInvoices: globalInvoices[2].size,
+          rejectedInvoices: globalInvoices[3].size,
+        }
+      }
     };
   } catch (error) {
-    console.error('Error fetching user profile:', error);
+    console.error('Error fetching user profile or stats:', error);
     return {
       success: false,
-      message: 'Failed to fetch user profile',
+      message: error.message || 'Failed to fetch user profile and statistics',
     };
   }
 }
-
-
-
-
-
 
 
 async function getadminDetails() {
@@ -200,8 +272,58 @@ async function RemoveAdmin(email) {
 
 
 
+async function updateInvoiceState(Data) {
+  if (!Data.invoiceID || !Data.updatedData?.state || !Data.userEmail || !Data.type) {
+    throw new Error("Document ID, new state, user email, and type are required");
+  }
+
+  const role = Data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+
+  // Choose the collection based on type
+  const collectionName = Data.type === "quotations" ? "quotations" : "invoices";
+
+  try {
+    // 1. Reference the correct document
+    const docRef = db.collection(collectionName).doc(Data.invoiceID);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      return { success: false, message: `${Data.type} not found` };
+    }
+
+    // 2. Only super admin can update the state directly
+    if (role !== "super_admin") {
+      return {
+        success: false,
+        message: "Permission denied: only super admin can update state",
+      };
+    }
+
+    // 3. Update only the 'state' field
+    await docRef.update({
+      status: Data.updatedData.state,
+      updatedAt: new Date().toISOString(),
+      updatedBy: Data.userEmail,
+    });
+
+    return {
+      success: true,
+      message: `${Data.type} state updated to "${Data.updatedData.state}"`,
+      id: Data.id,
+    };
+
+  } catch (error) {
+    console.error(`Error updating ${Data.type} state:`, error);
+    throw new Error(`Failed to update ${Data.type} state`);
+  }
+}
+
+
+
+
 module.exports = {
 
   addAdminUser , RemoveAdmin,
-  getadminDetails ,getUserProfile
+  getadminDetails ,getUserProfile,
+  updateInvoiceState
 };

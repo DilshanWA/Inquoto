@@ -59,7 +59,7 @@ const registerUser = async (data) => {
     });
 
     await db.collection("Addusers").doc(data.email).set({
-      state: 'Accept',
+      state: 'Accepted',
       name :data.name,
       reg_date :new Date().toISOString('en-GB')
     }, { merge: true });
