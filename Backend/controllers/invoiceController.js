@@ -167,14 +167,13 @@ async function updateInvoiceState(Data) {
 
 
 // Delete invoice by ID
-async function deleteInvoice(invoiceId ,userEmail) {
-  if (!invoiceId && !userEmail) throw new Error("Invoice ID Or Email is Miss");
+async function deleteInvoice(data) {
 
 
-  const role = userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
+  const role = data.userEmail === process.env.SUPERADMIN ? "super_admin" : "admin";
 
   try {
-    const invoiceRef = db.collection("invoices").doc(invoiceId);
+    const invoiceRef = db.collection("invoices").doc(data.invoiceId);
     const doc = await invoiceRef.get();
 
     if (!doc.exists) {
