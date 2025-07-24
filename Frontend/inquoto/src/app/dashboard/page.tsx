@@ -197,7 +197,7 @@ const barChartData = data
   );
 };
 
-// Summary Card Component
+
 const SummaryCard = ({ title, value, color }: { title: string; value: number; color: string }) => (
   <div className={`rounded-2xl shadow p-4 ${color} text-white`}>
     <h3 className="text-sm font-semibold">{title}</h3>
