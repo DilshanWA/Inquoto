@@ -1,12 +1,12 @@
 # 🧾 Invoice & Quotation Generator System
 
-A mobile and web-compatible system built to generate professional invoices and quotations for hardware shops, construction suppliers, and small businesses.
+A mobile and web-compatible system built to generate professional invoices and quotations for NeoMac Engineering
 
 ## 🚀 Features
 
 - Generate PDF invoices & quotations
-- users management
-- Download, share or print invoices
+- user management
+- Download, share, or print invoices
 - Multi-user login support (Firebase)
 - Dashboard with invoice history
 
