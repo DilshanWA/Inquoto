@@ -1,9 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import {
-  PieChart, Pie, Cell, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from 'recharts';
+import {PieChart, Pie, Cell, BarChart, Bar, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, XAxis,} from 'recharts';
 
 const COLORS = ['#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 

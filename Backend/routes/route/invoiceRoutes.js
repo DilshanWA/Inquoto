@@ -80,15 +80,17 @@ const State = async (req, res) => {
 const genPDF = async (req, res) => {
   try {
     const pdfBuffer = await generatePDF(req.body);
-    res.setHeader("Content-Type", "application/pdf");
+    const fileId = req.body.invoiceID || req.body.quotationID || "document";
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); 
-    res.send(pdfBuffer); // or use .pipe(stream)
+    res.send(pdfBuffer); 
   } catch (error) {
     console.error("PDF Generation Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 module.exports = {
   getAll,
