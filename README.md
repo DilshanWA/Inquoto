@@ -1,6 +1,6 @@
 # 🧾 Invoice & Quotation Generator System
 
-A mobile and web-compatible system built to generate professional invoices and quotations for NeoMac Engineering
+A  web-compatible system built to generate professional invoices and quotations for NeoMac Engineering (Pvt) Ltd
 
 ## 🚀 Features
 
