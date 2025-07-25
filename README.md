@@ -1,4 +1,4 @@
-# 🧾 InvoQuoto – Quotation & Invoice Management System
+# 🧾 QuantifyPro – Quotation & Invoice Management System
 
 A secure and feature-rich web application designed for **NeoMac Engineering Company** to streamline the creation, management, and tracking of invoices and quotations. The system supports role-based access, PDF generation, and smart analytics for efficient business operations.
 
@@ -6,7 +6,7 @@ A secure and feature-rich web application designed for **NeoMac Engineering Comp
 
 ## 🏢 Project Overview
 
-InvoQuoto is built to automate the process of generating, editing, and managing **invoices and quotations** for NeoMac Engineering. It supports **role-based permissions** for `Admin` and `User` roles, ensuring strict control over who can manage which documents.
+QuantifyPro is built to automate the process of generating, editing, and managing **invoices and quotations** for NeoMac Engineering. It supports **role-based permissions** for `Admin` and `User` roles, ensuring strict control over who can manage which documents.
 
 ---
 
@@ -29,7 +29,7 @@ InvoQuoto is built to automate the process of generating, editing, and managing 
 
 - 📌 Live counts for:
   - Total Invoices & Quotations
-  - Completed, Pending, and Canceled status
+  - Completed, Pending, Approved, and Rejected status
 - 🔍 Quick search and filtering
 - 🆔 Every invoice/quotation is assigned a **unique ID**
 - 📄 View or download invoices/quotations as **PDF documents**
