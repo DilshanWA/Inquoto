@@ -194,6 +194,6 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 ## 🙋‍♂️ Contributions
 
 Pull requests and suggestions are welcome!  
-If you find a bug or want to request a feature, please open an [Issue](https://github.com/yourusername/invoquoto/issues).
+If you find a bug or want to request a feature, please open an [Issue](https://github.com/DilshanWA/QuantifyPro/issues/36#issue-3262058828).
 
 ---
