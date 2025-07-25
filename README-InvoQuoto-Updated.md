@@ -127,6 +127,9 @@ FIREBASEAPIKEY=your_API_key
 
 ## 📸 Screenshots
 
+## Login Screen
+![LoginPage Screenshot](https://github.com/user-attachments/assets/08c67761-d031-4c6d-9252-d776858c8a22)
+
 ### Dashboard Overview  
 ![Dashboard Screenshot](https://github.com/user-attachments/assets/c5c9d0ff-2ef8-497a-b35b-83e5360417aa)
 
