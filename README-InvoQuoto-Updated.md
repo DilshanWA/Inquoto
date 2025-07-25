@@ -128,7 +128,7 @@ FIREBASEAPIKEY=your_API_key
 ## 📸 Screenshots
 
 ### Dashboard Overview  
-![Dashboard Screenshot](https://github.com/DilshanWA/QuantifyPro/blob/28b8620d6dff1cdebf0ad0fedc529acee4515500/screenshots/03.png))
+![Dashboard Screenshot](https://github.com/DilshanWA/QuantifyPro/issues/34#issue-3261917647/03.png))
 
 ### Invoice Preview  
 ![Invoice PDF Screenshot](./assets/invoice-preview.png)
