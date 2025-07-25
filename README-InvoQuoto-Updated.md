@@ -128,7 +128,7 @@ FIREBASEAPIKEY=your_API_key
 ## 📸 Screenshots
 
 ### Dashboard Overview  
-![Dashboard Screenshot](./public/images/01.png)
+![Dashboard Screenshot](/images/01.png)
 
 ### Invoice Preview  
 ![Invoice PDF Screenshot](./assets/invoice-preview.png)
