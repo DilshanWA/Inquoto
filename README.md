@@ -90,11 +90,11 @@ invoquoto/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/invoquoto.git
+git clone https://github.com/DilshanWA/QuantifyPro.git
 cd invoquoto
 ```
 
-### 2. Setup the Backend
+### 2. Set up the Backend
 
 ```bash
 cd backend
@@ -107,7 +107,6 @@ node app.js
 
 ```bash
 cd frontend
-cd 
 npm install
 npm run dev
 ```
