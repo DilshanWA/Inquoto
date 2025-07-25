@@ -51,7 +51,7 @@ QuantifyPro is built to automate the process of generating, editing, and managin
 ## 🛠️ Tech Stack
 
 ### Frontend
-- ⚛️ [Next.js](https://nextjs.org/) (App Router)
+- ⚛️ [Next.js](https://nextjs.org/)
 - 🎨 [Tailwind CSS](https://tailwindcss.com/)
 - ⛓️ TypeScript
 
