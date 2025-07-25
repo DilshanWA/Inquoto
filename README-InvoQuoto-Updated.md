@@ -57,7 +57,7 @@ InvoQuoto is built to automate the process of generating, editing, and managing 
 
 ### Backend
 - 🟩 Node.js + Express.js
-- 📦 Firebase firestore (store invoide & quotation details)
+- 📦 Firebase firestore (Store invoide,quotation,user details)
 - 📄 [PDF-lib](https://pdf-lib.js.org/) for PDF generation
 - 🔒 Firebase Authentication
 
@@ -119,8 +119,8 @@ Create a `.env` file in the `backend/` folder with the following variables:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret_key
+DATABASE=your_database_uri
+FIREBASEAPIKEY=your_API_key
 ```
 
 ---
@@ -128,7 +128,7 @@ JWT_SECRET=your_secret_key
 ## 📸 Screenshots
 
 ### Dashboard Overview  
-![Dashboard Screenshot](./)
+![Dashboard Screenshot](./public/images/01.png)
 
 ### Invoice Preview  
 ![Invoice PDF Screenshot](./assets/invoice-preview.png)
@@ -156,6 +156,16 @@ JWT_SECRET=your_secret_key
 Email: `youremail@example.com`
 
 ---
+
+
+## 👥 Team / Contributors
+
+| Name           | Role                  | GitHub                                    | Email                     |
+|----------------|-----------------------|-------------------------------------------|---------------------------|
+| Dineth         | Full Stack Developer  | [@dineth](https://github.com/yourusername) | youremail@example.com     |
+| John Silva     | Backend Developer     | [@johnsilva](https://github.com/johnsilva) | john@example.com          |
+| Amaya Perera   | UI/UX Designer        | [@amayap](https://github.com/amayap)       | amaya@example.com         |
+
 
 ## 📄 License
 
