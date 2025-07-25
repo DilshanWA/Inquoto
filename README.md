@@ -100,13 +100,14 @@ cd invoquoto
 cd backend
 npm install
 cp .env.example .env
-npm run dev
+node app.js
 ```
 
 ### 3. Setup the Frontend
 
 ```bash
 cd frontend
+cd 
 npm install
 npm run dev
 ```
