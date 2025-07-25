@@ -173,8 +173,8 @@ Email: `dilshan.personal12@gmail.com`
 
 | Name           | Role                  | GitHub                                    | Email                     |
 |----------------|-----------------------|-------------------------------------------|---------------------------|
-| Dilshan         | Full Stack Developer  | [@dineth](https://github.com/yourusername) | dilshan.personal12@gmail.com     |
-| AT Gayan     | Full Stack Developer     | [@johnsilva](https://github.com/ATgayan) |  thusitha.personal@gmail.com          |
+| Dilshan         | Full Stack Developer  | [@dilshan](https://github.com/yourusername) | dilshan.personal12@gmail.com     |
+| AT Gayan     | Full Stack Developer     | [@ATgayan](https://github.com/ATgayan) |  thusitha.personal@gmail.com          |
 
 
 ## 📄 License
