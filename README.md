@@ -91,7 +91,7 @@ invoquoto/
 
 ```bash
 git clone https://github.com/DilshanWA/QuantifyPro.git
-cd invoquoto
+cd QuantifyPro
 ```
 
 ### 2. Set up the Backend
@@ -100,6 +100,17 @@ cd invoquoto
 cd backend
 npm install
 cp .env.example .env
+
+> 🔐 **Create Firebase Admin SDK key**
+>
+> - Go to Firebase Console → Project Settings → Service Accounts
+> - Click **Generate new private key**
+> - Save it as `serviceAccountKey.json` in the `backend/` folder
+
+```bash
+node app.js
+```
+
 node app.js
 ```
 
