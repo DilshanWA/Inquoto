@@ -162,9 +162,9 @@ FIREBASEAPIKEY=your_API_key
 
 ## 🧑‍💻 Author
 
-**Dineth** – Full Stack Developer  
-[GitHub Profile](https://github.com/yourusername)  
-Email: `youremail@example.com`
+**Dilshan** – Full Stack Developer  
+[GitHub Profile](https://github.com/DilshanWA)  
+Email: `dilshan.personal12@gmail.com`
 
 ---
 
@@ -173,9 +173,8 @@ Email: `youremail@example.com`
 
 | Name           | Role                  | GitHub                                    | Email                     |
 |----------------|-----------------------|-------------------------------------------|---------------------------|
-| Dineth         | Full Stack Developer  | [@dineth](https://github.com/yourusername) | youremail@example.com     |
-| John Silva     | Backend Developer     | [@johnsilva](https://github.com/johnsilva) | john@example.com          |
-| Amaya Perera   | UI/UX Designer        | [@amayap](https://github.com/amayap)       | amaya@example.com         |
+| Dilshan         | Full Stack Developer  | [@dineth](https://github.com/yourusername) | dilshan.personal12@gmail.com     |
+| AT Gayan     | Full Stack Developer     | [@johnsilva](https://github.com/ATgayan) |  thusitha.personal@gmail.com          |
 
 
 ## 📄 License
