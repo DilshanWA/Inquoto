@@ -128,15 +128,23 @@ FIREBASEAPIKEY=your_API_key
 ## 📸 Screenshots
 
 ## Login Screen
-![LoginPage Screenshot](https://github.com/user-attachments/assets/08c67761-d031-4c6d-9252-d776858c8a22) ### Dashboard Overview  
+![LoginPage Screenshot](https://github.com/user-attachments/assets/08c67761-d031-4c6d-9252-d776858c8a22) 
+
+### Dashboard Overview  
 ![Dashboard Screenshot](https://github.com/user-attachments/assets/c5c9d0ff-2ef8-497a-b35b-83e5360417aa)
 
-
-
 ### Invoice Preview  
-![Invoice PDF Screenshot](./assets/invoice-preview.png)
+![Invoice PDF Screenshot](https://github.com/user-attachments/assets/d9091f5c-6f62-4c7e-aab1-8eb861ba9499)
 
----
+### Quotation Preview 
+![Invoice PDF Screenshot](https://github.com/user-attachments/assets/8bf2f07f-9fae-4385-9db9-85aa460ce9cb)
+
+#### Admin Panel
+![Invoice PDF Screenshot](https://github.com/user-attachments/assets/e3317d58-dbf3-46a3-9fc6-a6aa734ced25)
+
+###  New user register
+![Invoice PDF Screenshot](https://github.com/user-attachments/assets/8bff2e1c-5ca7-4fdc-85d7-ab77da7b8fa5)
+
 
 ## 📄 API Overview
 
