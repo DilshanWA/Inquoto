@@ -26,7 +26,7 @@ export default function LoginPage() {
     const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       setLoading(true);
-      setError('');  // Clear previous errors
+      setError('');  
 
       try {
         const response = await axios.post('http://localhost:5000/api/vi/login', {
@@ -34,33 +34,33 @@ export default function LoginPage() {
           password
         });
 
-        // Ensure all required data exists before storing
+
         const { uid, name, role, idToken } = response.data;
         if (!uid || !name || !role || !idToken) {
           throw new Error("Incomplete login response");
         }
 
         localStorage.setItem('uid', response.data.uid);
-        localStorage.setItem('name', response.data.name); // Store user data in local storage
-        localStorage.setItem('role', response.data.role); // Store role in local storage
+        localStorage.setItem('name', response.data.name); 
+        localStorage.setItem('role', response.data.role); 
         localStorage.setItem('token', response.data.idToken); 
-        localStorage.setItem('email', email); // Store email in local storage
-        router.push('/dashboard'); // Redirect on success
+        localStorage.setItem('email', email); 
+        router.push('/dashboard'); 
         addNotification("You have successfully logged in.");
 
       } catch (err: any) {
         console.error("Login failed:", err);
 
-        // Handle specific error messages based on the error type
+
         if (err.response?.data?.message) {
-          // Specific error message returned from the backend
+
           if (err.response.data.message.includes("Invalid email or password or borth")) {
             setError("Email or Password is incorrect.");
           } else {
             setError(err.response.data.message);
           }
         } else {
-          // Generic error message if no specific error response is provided
+
           setError("Login failed. Please try again.");
         }
       } finally {
@@ -72,7 +72,7 @@ export default function LoginPage() {
   return (
     <div className="h-screen flex items-center">
       <div className="h-screen w-1/2  relative">
-        {/* Error Popup will only appear inside this box */}
+
 
         <div className="flex flex-col items-center bg-white justify-center h-full">
           <div className="justify-center text-left mb-10 w-1/2">

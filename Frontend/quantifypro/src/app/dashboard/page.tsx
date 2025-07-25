@@ -1,9 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import {
-  PieChart, Pie, Cell, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from 'recharts';
+import {PieChart, Pie, Cell, BarChart, Bar, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, XAxis,} from 'recharts';
 
 const COLORS = ['#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -30,17 +27,10 @@ const Dashboard = () => {
   const [dateTime, setDateTime] = useState(new Date());
 
   const userID = localStorage.getItem('uid');
-  const userName = localStorage.getItem('name');
-
-    useEffect(() => {
-    const interval = setInterval(() => {
-      setDateTime(new Date());
-    }, 1000); // updates every second
-
-    return () => clearInterval(interval);
-  }, []);
-
+  const userName  = localStorage.getItem('name')
+  
   useEffect(() => {
+    setDateTime(new Date());
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -77,21 +67,13 @@ const Dashboard = () => {
     ];
   };
 
-  const statusMap = [
-  { label: 'Approved', key: 'approved' },
-  { label: 'Pending', key: 'pending' },
-  { label: 'Rejected', key: 'rejected' },
-  { label: 'Completed', key: 'complete' }, // NOTE: not "completed"
-];
-
-const barChartData = data
-  ? statusMap.map(({ label, key }) => ({
-      name: label,
-      Invoices: data?.[`${key}Invoices`] || 0,
-      Quotations: data?.[`${key}Quotations`] || 0,
-    }))
-  : [];
-
+  const barChartData = data
+    ? ['Approved', 'Pending', 'Rejected', 'Complete'].map((status) => ({
+        name: status,
+        Invoices: data?.[`${status.toLowerCase()}Invoices`] || 0,
+        Quotations: data?.[`${status.toLowerCase()}Quotations`] || 0,
+      }))
+    : [];
 
   if (loading) {
     return (
@@ -118,10 +100,9 @@ const barChartData = data
         </div>
         <div className="text-right mt-2 md:mt-0">
           <p className="text-sm text-gray-500">📅 {dateTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          <p className="text-sm text-gray-500">⏰ {dateTime.toLocaleTimeString()}</p>
+        
         </div>
       </div>
-
 
           {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
@@ -197,7 +178,7 @@ const barChartData = data
   );
 };
 
-
+// Summary Card Component
 const SummaryCard = ({ title, value, color }: { title: string; value: number; color: string }) => (
   <div className={`rounded-2xl shadow p-4 ${color} text-white`}>
     <h3 className="text-sm font-semibold">{title}</h3>

@@ -128,7 +128,7 @@ JWT_SECRET=your_secret_key
 ## 📸 Screenshots
 
 ### Dashboard Overview  
-![Dashboard Screenshot](./assets/dashboard.png)
+![Dashboard Screenshot](./)
 
 ### Invoice Preview  
 ![Invoice PDF Screenshot](./assets/invoice-preview.png)

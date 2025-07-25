@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearch } from '@/app/context/SearchContext';
 import PopupMessage from '../messages/InvQuoMsg/SuccessPopup';
-import Message from './../messages/InvQuoMsg/SuccessPopup';
+import Message from '../messages/InvQuoMsg/SuccessPopup';
 
 type Document = {
   id?: string;
