@@ -191,9 +191,13 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 ---
 
-## 🙋‍♂️ Contributions
+## 🤝 Contributing
 
 Pull requests and suggestions are welcome!  
-If you find a bug or want to request a feature, please open an [Issue](https://github.com/DilshanWA/QuantifyPro/issues/36#issue-3262058828).
+If you find a bug or want to request a feature, please [open an issue](https://github.com/DilshanWA/QuantifyPro/issues).
 
----
+Make sure your issue includes:
+- ✅ A clear title
+- 🐞 Bug: What happened, what you expected
+- 💡 Feature: What you want to add and why
+
