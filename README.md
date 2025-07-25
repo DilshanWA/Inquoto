@@ -111,9 +111,6 @@ cp .env.example .env
 node app.js
 ```
 
-node app.js
-```
-
 ### 3. Setup the Frontend
 
 ```bash
